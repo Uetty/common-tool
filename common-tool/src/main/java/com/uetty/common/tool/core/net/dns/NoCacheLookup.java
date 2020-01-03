@@ -71,7 +71,7 @@ public class NoCacheLookup {
 
     private Resolver getDefaultResolver() throws UnknownHostException {
         Set<String> defaultDnsServers = getDefaultDnsServers();
-        return new org.xbill.DNS.DynamicRoutingResolver(new ArrayList<>(defaultDnsServers));
+        return new DynamicRoutingResolver(new ArrayList<>(defaultDnsServers));
     }
 
     public Resolver getResolver() throws UnknownHostException {
