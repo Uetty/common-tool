@@ -4,7 +4,7 @@
 
 	<groupId>com.uetty.common</groupId>
 	<artifactId>common-parent</artifactId>
-	<version>${revision}</version>
+	<version>1.2.9-ALPHA</version>
 	<packaging>pom</packaging>
 
 	<name>common-parent</name>
@@ -13,7 +13,6 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jdk.version>1.8</jdk.version>
-		<revision>1.2.5-alpha</revision>
 		<slf4j.version>1.7.7</slf4j.version>
 		<logback.version>1.2.3</logback.version>
 		<jackson.version>[2.9.8,)</jackson.version>
