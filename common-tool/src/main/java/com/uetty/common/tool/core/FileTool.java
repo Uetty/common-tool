@@ -15,7 +15,7 @@ public class FileTool {
 	private static final String tmpFileDir = Global.TMP_FILE_DIR.getValue();
 
 	/**
-	 * 随机产生临时文件路径
+	 * 产生临时文件路径（随机文件名）
 	 * @param extName 扩展名
 	 * @return 绝对路径
 	 */
@@ -59,15 +59,13 @@ public class FileTool {
 		}
 	}
 	
-	public static void writeLine(File file, String string) throws IOException {
+	public static void writeToFile(File file, String string, boolean append) throws IOException {
 		if (!file.exists()) {
 			file.getParentFile().mkdirs();
 			file.createNewFile();
 		}
-		try (FileOutputStream fis = new FileOutputStream(file, true)) {
+		try (FileOutputStream fis = new FileOutputStream(file, append)) {
 			fis.write(string.getBytes());
-			fis.write("\n".getBytes());
-
 		}
 	}
 	
@@ -165,13 +163,34 @@ public class FileTool {
 		}
         if (file.isDirectory()) {
             File[] children = file.listFiles();
-            if (children == null) children = new File[0];
-            for (File child : children) {
-                deleteFiles0(child, ignore);
-            }
+            if (children != null) {
+				for (File child : children) {
+					deleteFiles0(child, ignore);
+				}
+			}
         }
         file.delete();
     }
+
+    public static List<File> findFileByName(File root, String fileName) {
+		List<File> files = new ArrayList<>();
+		if (root == null || !root.exists()) {
+			return files;
+		}
+		if (root.isDirectory()) {
+			File[] children = root.listFiles();
+			if (children != null) {
+				for (File child : children) {
+					files.addAll(findFileByName(child, fileName));
+				}
+			}
+		} else {
+			if (Objects.equals(fileName, root.getName())) {
+				files.add(root);
+			}
+		}
+		return files;
+	}
 
     public static void copyFiles(File sourceFile, File targetFile, boolean override) throws IOException {
         copyFiles0(sourceFile, targetFile, override, targetFile);
@@ -254,4 +273,13 @@ public class FileTool {
         copyFiles(sourceFile, targetFile, override);
         deleteFiles0(sourceFile, targetFile);
     }
+
+	public static void main(String[] args) {
+		long start = System.currentTimeMillis();
+		File file = new File("E:\\IdeaProjects");
+		List<File> findFiles = findFileByName(file, ".gitignore");
+		System.out.println(findFiles);
+
+		System.out.println((System.currentTimeMillis() - start));
+	}
 }
