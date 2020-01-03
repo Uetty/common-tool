@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 public class HtmlUtil {
 
-	static Map<String, String> ESCAPE_HTML_REPLACE_MAP = null;
+    static Map<String, String> ESCAPE_HTML_REPLACE_MAP = null;
     static Map<String, String> ESCAPE_SCRIPT_REPLACE_MAP = null;
     private static void initEscapeHTMLMapping() {
         if (ESCAPE_HTML_REPLACE_MAP != null) return;
@@ -184,8 +184,8 @@ public class HtmlUtil {
         StringBuilder sb = new StringBuilder();
         sb.append(html);
         blocks.forEach(block -> {
-            String headTag = markMap.get(block.openKey);
-            String tailTag = block.closeKey != null ? markMap.get(block.closeKey) : null;
+            String headTag = markMap.remove(block.openKey);
+            String tailTag = block.closeKey != null ? markMap.remove(block.closeKey) : null;
 
             String fullHtml = sb.toString();
             int openIdx = fullHtml.indexOf(block.openKey);
@@ -198,7 +198,14 @@ public class HtmlUtil {
             sb.delete(0, sb.length());
             sb.append(fullHtml);
         });
-        return sb.toString();
+        String text = sb.toString();
+        if (markMap.size() > 0) {
+            Set<Map.Entry<String, String>> entries = markMap.entrySet();
+            for (Map.Entry<String, String> entry : entries) {
+                text = text.replace(entry.getKey(), entry.getValue());
+            }
+        }
+        return text;
     }
 
     /**
@@ -216,12 +223,13 @@ public class HtmlUtil {
             boolean nextCloseMark = i >= openLocates.length || (k < closeLocates.length && closeLocates[k] < openLocates[i]); // 下一个标签是close
 
             if (nextCloseMark) { // 下一个标签是close，如：</span>
-                if (openStack.size() == 0) continue;
-                int ii = openStack.remove(openStack.size() - 1);
-                Block block = new Block();
-                block.openKey = openKeys.get(ii);
-                block.closeKey = closeKeys.get(k);
-                blocks.add(block);
+                if (openStack.size() > 0) {
+                    int ii = openStack.remove(openStack.size() - 1);
+                    Block block = new Block();
+                    block.openKey = openKeys.get(ii);
+                    block.closeKey = closeKeys.get(k);
+                    blocks.add(block);
+		}
                 k++;
             } else { // 下一个标签是open，如：<span>
                 openStack.add(i);
