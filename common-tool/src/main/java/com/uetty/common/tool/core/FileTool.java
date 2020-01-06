@@ -4,10 +4,12 @@ import com.uetty.common.tool.constant.Global;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
 
 @SuppressWarnings({"ResultOfMethodCallIgnored", "WeakerAccess", "unused"})
 public class FileTool {
@@ -80,20 +82,62 @@ public class FileTool {
 
 	public static List<String> readLines(File file) throws IOException {
 		try (FileInputStream fis = new FileInputStream(file)) {
-			return readLines(fis);
+			return readLines(fis, StandardCharsets.UTF_8.name());
+		}
+	}
+
+	public static List<String> readLines(File file, String charset) throws IOException {
+		try (FileInputStream fis = new FileInputStream(file)) {
+			return readLines(fis, charset);
 		}
 	}
 
 	public static List<String> readLines(InputStream inputStream) throws IOException {
-		List<String> lines = new ArrayList<>();
-		try (InputStreamReader reader = new InputStreamReader(inputStream);
+		return readLines(inputStream, StandardCharsets.UTF_8.name());
+	}
+
+	public static List<String> readLines(InputStream inputStream, String charset) throws IOException {
+		List<String> list = new ArrayList<>();
+		try (InputStreamReader reader = new InputStreamReader(inputStream, charset);
 			 BufferedReader br = new BufferedReader(reader)) {
+
 			String line;
 			while ((line = br.readLine()) != null) {
-				lines.add(line);
+				list.add(line);
 			}
 		}
-		return lines;
+		return list;
+	}
+
+	public static <R> List<R> handleLines(File file, Function<String, R> map) throws IOException {
+		return handleLines(file, StandardCharsets.UTF_8.name(), map);
+	}
+
+	public static <R> List<R> handleLines(File file, String charset, Function<String, R> map) throws IOException {
+		try (FileInputStream fis = new FileInputStream(file)) {
+			return handleLines(fis, charset, map);
+		}
+	}
+
+	public static <R> List<R> handleLines(InputStream inputStream, Function<String, R> map) throws IOException {
+		return handleLines(inputStream, StandardCharsets.UTF_8.name(), map);
+	}
+
+	@SuppressWarnings("WeakerAccess")
+	public static <R> List<R> handleLines(InputStream inputStream, String charset, Function<String, R> map) throws IOException {
+		List<R> rs = new ArrayList<>();
+		try (InputStreamReader reader = new InputStreamReader(inputStream, charset);
+			 BufferedReader br = new BufferedReader(reader)) {
+
+			String line;
+			while ((line = br.readLine()) != null) {
+				R apply = map.apply(line);
+				if (apply != null) {
+					rs.add(apply);
+				}
+			}
+		}
+		return rs;
 	}
 
 	/**
