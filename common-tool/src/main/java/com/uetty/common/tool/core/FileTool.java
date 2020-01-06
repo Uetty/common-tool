@@ -80,6 +80,32 @@ public class FileTool {
 		}
 	}
 
+	public static String readToString(File file) throws IOException {
+		return readToString(file, StandardCharsets.UTF_8.name());
+	}
+
+	public static String readToString(File file, String charset) throws IOException {
+		try (FileInputStream inputStream = new FileInputStream(file)) {
+			return readToString(inputStream, charset);
+		}
+	}
+
+	public static String readToString(InputStream inputStream) throws IOException {
+		return readToString(inputStream, StandardCharsets.UTF_8.name());
+	}
+
+	public static String readToString(InputStream inputStream, String charset) throws IOException {
+		try (InputStreamReader reader = new InputStreamReader(inputStream, charset)) {
+			StringBuilder writer = new StringBuilder();
+			char[] chars = new char[1024];
+			int c;
+			while ((c = reader.read(chars, 0, chars.length)) > 0) {
+				writer.append(chars, 0, c);
+			}
+			return writer.toString();
+		}
+	}
+
 	public static List<String> readLines(File file) throws IOException {
 		try (FileInputStream fis = new FileInputStream(file)) {
 			return readLines(fis, StandardCharsets.UTF_8.name());
