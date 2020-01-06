@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 @SuppressWarnings({"ResultOfMethodCallIgnored", "WeakerAccess", "unused"})
 public class FileTool {
@@ -135,35 +135,55 @@ public class FileTool {
 		return list;
 	}
 
-	public static <R> List<R> handleLines(File file, Function<String, R> map) throws IOException {
-		return handleLines(file, StandardCharsets.UTF_8.name(), map);
+	public static void readLineByLine(File file, Consumer<String> consumer) throws IOException {
+		readLineByLine(file, StandardCharsets.UTF_8.name(), consumer);
 	}
 
-	public static <R> List<R> handleLines(File file, String charset, Function<String, R> map) throws IOException {
-		try (FileInputStream fis = new FileInputStream(file)) {
-			return handleLines(fis, charset, map);
+	public static void readLineByLine(File file, String charset, Consumer<String> consumer) throws IOException {
+		try (FileInputStream inputStream = new FileInputStream(file)) {
+			readLineByLine(inputStream, charset, consumer);
 		}
 	}
 
-	public static <R> List<R> handleLines(InputStream inputStream, Function<String, R> map) throws IOException {
-		return handleLines(inputStream, StandardCharsets.UTF_8.name(), map);
+	public static void readLineByLine(InputStream inputStream, Consumer<String> consumer) throws IOException {
+		readLineByLine(inputStream, StandardCharsets.UTF_8.name(), consumer);
 	}
 
-	@SuppressWarnings("WeakerAccess")
-	public static <R> List<R> handleLines(InputStream inputStream, String charset, Function<String, R> map) throws IOException {
-		List<R> rs = new ArrayList<>();
+	public static void readLineByLine(InputStream inputStream, String charset, Consumer<String> consumer) throws IOException {
 		try (InputStreamReader reader = new InputStreamReader(inputStream, charset);
 			 BufferedReader br = new BufferedReader(reader)) {
-
 			String line;
 			while ((line = br.readLine()) != null) {
-				R apply = map.apply(line);
-				if (apply != null) {
-					rs.add(apply);
-				}
+				consumer.accept(line);
 			}
 		}
-		return rs;
+	}
+
+	public static void readCharByChar(File file, int maxLength, Consumer<char[]> consumer) throws IOException {
+		readCharByChar(file, StandardCharsets.UTF_8.name(), maxLength, consumer);
+	}
+
+	public static void readCharByChar(File file, String charset, int maxLength, Consumer<char[]> consumer) throws IOException {
+		try (FileInputStream inputStream = new FileInputStream(file)) {
+			readCharByChar(inputStream, charset, maxLength, consumer);
+		}
+	}
+
+	public static void readCharByChar(InputStream inputStream, int maxLength, Consumer<char[]> consumer) throws IOException {
+		readCharByChar(inputStream, StandardCharsets.UTF_8.name(), maxLength, consumer);
+	}
+
+	public static void readCharByChar(InputStream inputStream, String charset, int maxLength, Consumer<char[]> consumer) throws IOException {
+		assert maxLength > 0;
+		try (InputStreamReader reader = new InputStreamReader(inputStream, charset)) {
+			char[] chars = new char[maxLength];
+			int c;
+			while ((c = reader.read(chars, 0, chars.length)) > 0) {
+				char[] cb = new char[c];
+				System.arraycopy(chars, 0, cb, 0, c);
+				consumer.accept(cb);
+			}
+		}
 	}
 
 	/**
