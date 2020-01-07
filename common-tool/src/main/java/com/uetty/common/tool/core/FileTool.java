@@ -99,7 +99,7 @@ public class FileTool {
 			StringBuilder writer = new StringBuilder();
 			char[] chars = new char[1024];
 			int c;
-			while ((c = reader.read(chars, 0, chars.length)) > 0) {
+			while ((c = reader.read(chars, 0, chars.length)) != -1) {
 				writer.append(chars, 0, c);
 			}
 			return writer.toString();
@@ -174,15 +174,36 @@ public class FileTool {
 	}
 
 	public static void readCharByChar(InputStream inputStream, String charset, int maxLength, Consumer<char[]> consumer) throws IOException {
-		assert maxLength > 0;
+		if (maxLength <= 0) {
+			maxLength = 1024;
+		}
 		try (InputStreamReader reader = new InputStreamReader(inputStream, charset)) {
 			char[] chars = new char[maxLength];
 			int c;
-			while ((c = reader.read(chars, 0, chars.length)) > 0) {
+			while ((c = reader.read(chars, 0, chars.length)) != -1) {
 				char[] cb = new char[c];
 				System.arraycopy(chars, 0, cb, 0, c);
 				consumer.accept(cb);
 			}
+		}
+	}
+
+	public static void readByteByByte(File file, int maxLength, Consumer<byte[]> consumer) throws IOException {
+		try (FileInputStream inputStream = new FileInputStream(file)) {
+			readByteByByte(inputStream, maxLength, consumer);
+		}
+	}
+
+	public static void readByteByByte(InputStream inputStream, int maxLength, Consumer<byte[]> consumer) throws IOException {
+		if (maxLength <= 0) {
+			maxLength = 1024;
+		}
+		byte[] collect = new byte[maxLength];
+		int c;
+		while ((c = inputStream.read(collect, 0, collect.length)) != -1) {
+			byte[] bytes = new byte[c];
+			System.arraycopy(collect, 0, bytes, 0, c);
+			consumer.accept(bytes);
 		}
 	}
 
