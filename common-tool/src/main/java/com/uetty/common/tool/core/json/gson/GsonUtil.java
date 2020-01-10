@@ -1,14 +1,21 @@
 package com.uetty.common.tool.core.json.gson;
 
+import com.google.gson.*;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import java.util.function.Consumer;
 
 public class GsonUtil {
+
+	public static String toJson(Object a, Consumer<GsonBuilder> configSetter) {
+		GsonBuilder gsonBuilder = new GsonBuilder();
+		if (configSetter != null) {
+			configSetter.accept(gsonBuilder);
+		}
+		Gson gson = gsonBuilder.create();
+		return gson.toJson(a);
+	}
 
 	public static String toJson(Object a) {
 		return new Gson().toJson(a).toString();
