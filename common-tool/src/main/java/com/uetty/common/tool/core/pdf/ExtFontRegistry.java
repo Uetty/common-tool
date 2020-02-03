@@ -1,7 +1,6 @@
 package com.uetty.common.tool.core.pdf;
 
 import com.itextpdf.text.FontFactory;
-
 import fr.opensagres.xdocreport.itext.extension.font.AbstractFontRegistry;
 
 public class ExtFontRegistry extends AbstractFontRegistry {

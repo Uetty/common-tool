@@ -1,6 +1,5 @@
 package com.uetty.common.tool.core.api.github;
 
-import com.uetty.common.tool.core.api.github.GithubToken;
 import com.uetty.common.tool.core.api.AbstractApiTokenManager;
 
 import java.io.Serializable;

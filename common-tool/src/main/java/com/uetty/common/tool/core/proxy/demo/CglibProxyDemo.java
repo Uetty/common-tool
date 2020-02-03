@@ -1,7 +1,6 @@
 package com.uetty.common.tool.core.proxy.demo;
 
 import com.uetty.common.tool.core.proxy.CglibProxy;
-
 import net.sf.cglib.proxy.Callback;
 
 public class CglibProxyDemo {

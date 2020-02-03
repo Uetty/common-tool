@@ -1,22 +1,20 @@
 package com.uetty.common.tool.core.email;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.google.gson.Gson;
+import com.uetty.common.tool.core.email.JavaEmailSender.Attachment;
+import com.uetty.common.tool.core.email.JavaEmailSender.MailInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.mail.Address;
 import javax.mail.MessagingException;
 import javax.mail.SendFailedException;
 import javax.mail.internet.InternetAddress;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.gson.Gson;
-import com.uetty.common.tool.core.email.JavaEmailSender.Attachment;
-import com.uetty.common.tool.core.email.JavaEmailSender.MailInfo;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * 邮件发送工具

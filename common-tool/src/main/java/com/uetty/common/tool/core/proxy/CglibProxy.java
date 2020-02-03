@@ -2,8 +2,9 @@ package com.uetty.common.tool.core.proxy;
 
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.CallbackFilter;
-//import net.sf.cglib.proxy.Dispatcher;
 import net.sf.cglib.proxy.Enhancer;
+
+//import net.sf.cglib.proxy.Dispatcher;
 //import net.sf.cglib.proxy.FixedValue;
 //import net.sf.cglib.proxy.InvocationHandler;
 //import net.sf.cglib.proxy.LazyLoader;

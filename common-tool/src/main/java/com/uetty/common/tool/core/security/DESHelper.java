@@ -1,10 +1,9 @@
 package com.uetty.common.tool.core.security;
 
+import javax.crypto.KeyGenerator;
 import java.io.IOException;
 import java.security.Key;
 import java.util.Base64;
-
-import javax.crypto.KeyGenerator;
 
 public class DESHelper {
 

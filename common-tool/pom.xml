@@ -19,6 +19,8 @@
 		<org.apache.poi.version>3.12</org.apache.poi.version>
 		<itextpdf.itextpdf.version>5.5.13</itextpdf.itextpdf.version>
 		<pinyin4j.version>2.5.0</pinyin4j.version>
+		<dnsjava.version>2.1.9</dnsjava.version>
+		<fastjson.version>1.2.56</fastjson.version>
 	</properties>
 
 	<dependencies>
@@ -131,13 +133,13 @@
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			<version>1.2.56</version>
+			<version>${fastjson.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>dnsjava</groupId>
 			<artifactId>dnsjava</artifactId>
-			<version>2.1.9</version>
+			<version>${dnsjava.version}</version>
 		</dependency>
 	</dependencies>
 

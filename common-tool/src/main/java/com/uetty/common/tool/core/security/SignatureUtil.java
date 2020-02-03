@@ -1,15 +1,14 @@
 package com.uetty.common.tool.core.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 /**
@@ -111,7 +110,7 @@ public class SignatureUtil {
 			sb.append(PARAM_SECRET);
 			sb.append("=");
 			sb.append(secret);
-			return MD5Utils.encode(sb.toString().substring(1));
+			return DigestUtil.md5Sum(sb.toString().substring(1));
 		} catch (NoSuchAlgorithmException e) {
 			logger.error(e.getMessage(), e);
 		}

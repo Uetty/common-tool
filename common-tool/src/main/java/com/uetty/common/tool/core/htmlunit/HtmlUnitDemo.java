@@ -1,8 +1,5 @@
 package com.uetty.common.tool.core.htmlunit;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.Page;
@@ -10,6 +7,9 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.html.HtmlDivision;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
 
 public class HtmlUnitDemo {
 

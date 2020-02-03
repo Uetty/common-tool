@@ -1,16 +1,16 @@
 package com.uetty.common.doc.tester;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uetty.common.tool.core.FileTool;
 import com.uetty.common.tool.core.HttpMultipartUtil;
 import com.uetty.common.tool.core.security.SignatureUtil;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TestFileUpload {
 

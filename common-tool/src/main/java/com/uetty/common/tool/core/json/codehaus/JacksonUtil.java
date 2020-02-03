@@ -1,14 +1,10 @@
 package com.uetty.common.tool.core.json.codehaus;
 
-import java.io.IOException;
-
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.DeserializationConfig;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.Module;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
+import org.codehaus.jackson.map.*;
+
+import java.io.IOException;
 
 /** 
  * codehaus版本jackson工具类（旧版jackson，新版是fasterxml）

@@ -81,6 +81,10 @@ public class NoCacheLookup {
         return this.resolver;
     }
 
+    public NoCacheLookup(List<String> dnsServers) throws UnknownHostException {
+        this(DEFAULT_TYPE, new DynamicRoutingResolver(dnsServers));
+    }
+
     public NoCacheLookup(String[] dnsServers) throws UnknownHostException {
         this(DEFAULT_TYPE, new DynamicRoutingResolver(new ArrayList<>(Arrays.asList(dnsServers))));
     }
