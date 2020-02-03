@@ -331,20 +331,20 @@ public class NoCacheLookup {
         this.lookup(tname);
     }
 
-    public Record[] run(String domain) {
+    public Answer run(String domain) {
         return run(domain, DEFAULT_TYPE);
     }
 
-    public Record[] run(String domain, int type) {
+    public Answer run(String domain, int type) {
         try {
             Name name = Name.fromString(domain);
             return run(name,type);
         } catch (TextParseException e) {
-            return new Record[0];
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
-    public Record[] run(Name name, int type) {
+    public Answer run(Name name, int type) {
         if (this.done) {
             this.reset();
         }
@@ -384,56 +384,79 @@ public class NoCacheLookup {
             }
         }
 
-        return this.answers;
+        return new Answer();
     }
 
-    private void checkDone() {
-        if (!this.done || this.result == -1) {
-            StringBuilder sb = new StringBuilder("Lookup of " + this.name + " ");
-            if (this.dclass != 1) {
-                sb.append(DClass.string(this.dclass)).append(" ");
-            }
+//    private void checkDone() {
+//        if (!this.done || this.result == -1) {
+//            StringBuilder sb = new StringBuilder("Lookup of " + this.name + " ");
+//            if (this.dclass != 1) {
+//                sb.append(DClass.string(this.dclass)).append(" ");
+//            }
+//
+//            sb.append(Type.string(this.type)).append(" isn't done");
+//            throw new IllegalStateException(sb.toString());
+//        }
+//    }
 
-            sb.append(Type.string(this.type)).append(" isn't done");
-            throw new IllegalStateException(sb.toString());
+//    Lookup.class
+//    public static final int SUCCESSFUL = 0;
+//    public static final int UNRECOVERABLE = 1;
+//    public static final int TRY_AGAIN = 2;
+//    public static final int HOST_NOT_FOUND = 3;
+//    public static final int TYPE_NOT_FOUND = 4;
+    class Answer {
+        int result;
+        Name name;
+        Record[] records;
+        Name[] aliases;
+        String errorString;
+
+        private Answer() {
+            this.result = NoCacheLookup.this.result;
+            this.name = NoCacheLookup.this.name;
+            this.records = NoCacheLookup.this.answers;
+            this.aliases = NoCacheLookup.this.aliases == null ? noAliases : NoCacheLookup.this.aliases.toArray(new Name[0]);
+
+            if (NoCacheLookup.this.error != null) {
+                this.errorString = NoCacheLookup.this.error;
+            } else {
+                switch (NoCacheLookup.this.result) {
+                    case Lookup.SUCCESSFUL:
+                        this.errorString =  "successful";
+                        break;
+                    case Lookup.UNRECOVERABLE:
+                        this.errorString = "unrecoverable error";
+                        break;
+                    case Lookup.TRY_AGAIN:
+                        this.errorString = "try again";
+                        break;
+                    case Lookup.HOST_NOT_FOUND:
+                        this.errorString = "host not found";
+                        break;
+                    case Lookup.TYPE_NOT_FOUND:
+                        this.errorString = "type not found";
+                        break;
+                    default:
+                        throw new IllegalStateException("unknown result");
+                }
+            }
+        }
+
+        public int getResult() {
+            return result;
+        }
+        public Name getName() {
+            return name;
+        }
+        public Record[] getRecords() {
+            return records;
+        }
+        public Name[] getAliases() {
+            return aliases;
+        }
+        public String getErrorString() {
+            return errorString;
         }
     }
-
-    public Record[] getAnswers() {
-        this.checkDone();
-        return this.answers;
-    }
-
-    public Name[] getAliases() {
-        this.checkDone();
-        return this.aliases == null ? noAliases : this.aliases.toArray(new Name[0]);
-    }
-
-    public int getResult() {
-        this.checkDone();
-        return this.result;
-    }
-
-    public String getErrorString() {
-        this.checkDone();
-        if (this.error != null) {
-            return this.error;
-        } else {
-            switch (this.result) {
-                case 0:
-                    return "successful";
-                case 1:
-                    return "unrecoverable error";
-                case 2:
-                    return "try again";
-                case 3:
-                    return "host not found";
-                case 4:
-                    return "type not found";
-                default:
-                    throw new IllegalStateException("unknown result");
-            }
-        }
-    }
-
 }
