@@ -1,20 +1,22 @@
 package com.uetty.common.tool.core.string;
 
-import java.io.File;
-import java.io.UnsupportedEncodingException;
-
 public class UnicodeCoder {
-
-	public static String encode(String str) {
+	/**
+	 * 字符串转为unicode值，参数二是否将ASCII字符转为unicode表示
+	 */
+	public static String encode(String str, boolean encodeAscii) {
 		StringBuilder sb = new StringBuilder();
 		char[] charArray = str.toCharArray();
 		for (int i = 0; i < charArray.length; i++) {
 			char c = charArray[i];
-			sb.append(charToUnicodeString(c));
+			sb.append(charToUnicodeString(c, encodeAscii));
 		}
 		return sb.toString();
 	}
-	
+
+	/**
+	 * unicode值转为字符串
+	 */
 	public static String decode(String str) throws UnsupportDecodeException {
 
 		StringBuilder sb = new StringBuilder();
@@ -54,19 +56,24 @@ public class UnicodeCoder {
 		return false;
 	}
 	
-	private static String charToUnicodeString(char c) {
-		if (c < 0x100) {
+	private static String charToUnicodeString(char c, boolean encodeAscii) {
+		if (c < 0x80 && !encodeAscii) {
 			if (c == '\\') {
 				return "\\\\";
 			} else {
 				return c + "";
 			}
 		}
+
 		String hex = Integer.toHexString(c);
-		if (c >= 0x1000) {
-			return "\\u" + hex;
-		} else {
+		if (c < 0x10) {
+			return "\\u000" + hex;
+		} else if (c < 0x100) {
+			return "\\u00" + hex;
+		} else if (c < 0x1000) {
 			return "\\u0" + hex;
+		} else {
+			return "\\u" + hex;
 		}
 	}
 	
@@ -76,14 +83,10 @@ public class UnicodeCoder {
 		public UnsupportDecodeException() {
 		}
 	}
-	
-	public static void main(String[] args) throws UnsupportDecodeException, UnsupportedEncodingException {
-		String str = "\\\\\u901a\\u7528\\u6a21\\u677f\n";
-		System.out.println(decode(str));
 
-		String filePath = "C:\\Users\\Vince\\Desktop\\diff.txt\u0000后面的字符被截断了把";
-		File file = new File(filePath);
-		System.out.println(file.exists());
-		System.out.println(file.getAbsolutePath());
+	public static void main(String[] args) throws UnsupportDecodeException {
+		System.out.println(encode("中abcµ", true)); // \u4e2d
+		System.out.println("\u4e2d"); // 不需要转换，jvm自动处理
+		System.out.println(decode("\\u4e2d")); // 中
 	}
 }
