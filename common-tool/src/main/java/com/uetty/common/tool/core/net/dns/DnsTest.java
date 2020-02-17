@@ -26,7 +26,25 @@ public class DnsTest {
         String[] servers = ResolverConfig.getCurrentConfig().servers();
         Set<String> set = new HashSet<>();
         if (servers != null) {
-            set.addAll(Arrays.asList(servers));
+            for (String server : servers) {
+                if ("0.0.0.0".equals(server) || server.startsWith("192.")
+                        || server.startsWith("10.")) {
+                    continue;
+                }
+                if (server.startsWith("172.")) {
+                    String substring = server.substring(4);
+                    int i = substring.indexOf(".");
+                    try {
+                        if (i > 0) {
+                            int l2 = Integer.parseInt(substring.substring(0, i));
+                            if ((l2 & 0x10) != 0) {
+                                continue;
+                            }
+                        }
+                    } catch (Exception ignore) {}
+                }
+                set.add(server);
+            }
         }
         set.remove("0.0.0.0");
         List<String> list = new ArrayList<>(set);
@@ -81,7 +99,7 @@ public class DnsTest {
         resolver = new DynamicRoutingResolver(dnsServers);
 
 
-        int threadSize = 30;
+        int threadSize = 40;
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(threadSize);
 
         long startTime = System.currentTimeMillis();

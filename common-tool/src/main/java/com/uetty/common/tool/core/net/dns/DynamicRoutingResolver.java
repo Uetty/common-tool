@@ -7,6 +7,7 @@ import org.xbill.DNS.*;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -253,10 +254,22 @@ public class DynamicRoutingResolver implements Resolver {
      * 打印统计信息
      */
     public void printStatistics() {
-        List<IndexedResolver> list = new ArrayList<>(this.resolvers)
-                .stream()
-                .sorted((ir1, ir2) -> (int) (ir2.getStatisticCount().get() - ir1.getStatisticCount().get()))
-                .collect(Collectors.toList());
-        LOG.debug(list.toString());
+
+        List<IndexedResolver> list = new ArrayList<>(this.resolvers);
+        Integer[] indexes = new Integer[list.size()];
+        for (int i = 0; i < indexes.length; i++) {
+            indexes[i] = i;
+        }
+        float[] aves = new float[list.size()];
+        for (int i = 0; i < aves.length; i++) {
+            aves[i] = ((float)list.get(i).statisticCount.get() * 1000 / UNIT_WEIGHT_TIME / list.get(i).statisticWeight.get());
+        }
+        Arrays.sort(indexes, (idx1, idx2) -> Float.compare(aves[idx2], aves[idx1]));
+
+        List<IndexedResolver> listSorted = new ArrayList<>();
+        for (Integer index : indexes) {
+            listSorted.add(list.get(index));
+        }
+        LOG.debug(listSorted.toString());
     }
 }
