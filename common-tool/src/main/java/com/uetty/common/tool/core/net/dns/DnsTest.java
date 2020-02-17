@@ -24,10 +24,12 @@ public class DnsTest {
      */
     private static List<String> getDefaultDnsServers() {
         String[] servers = ResolverConfig.getCurrentConfig().servers();
-        List<String> list = new ArrayList<>();
+        Set<String> set = new HashSet<>();
         if (servers != null) {
-            list.addAll(Arrays.asList(servers));
+            set.addAll(Arrays.asList(servers));
         }
+        set.remove("0.0.0.0");
+        List<String> list = new ArrayList<>(set);
         System.out.println("default dns ---> " + list);
         return list;
     }
