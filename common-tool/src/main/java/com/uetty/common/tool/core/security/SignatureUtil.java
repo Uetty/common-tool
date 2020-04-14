@@ -5,10 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 
 /**
@@ -54,6 +51,7 @@ public class SignatureUtil {
 	 */
 	public static Map<String, Object> signData(Object params, String secret) {
 		TreeMap<String, Object> map = obj2Map(params);
+		Objects.requireNonNull(map);
 		map.put(PARAM_TIMESTAMP, System.currentTimeMillis());
 		// 计算签名字符串
 		String signedString = getSignedString(map, secret);
@@ -70,20 +68,20 @@ public class SignatureUtil {
 	 * <p>String类型签名字符串 字段名/键名为：{@linkplain SignatureUtil#PARAM_SIGNATURE}
 	 * </blockquote>
 	 * @param secret 验签时使用的密钥
-	 * @return
 	 */
 	public static void assertValid(Object params, String secret) {
 		TreeMap<String, Object> map = obj2Map(params);
-				
+		Objects.requireNonNull(map);
+
 		Long t = (Long) map.get(PARAM_TIMESTAMP);
-		Long cur = System.currentTimeMillis();
+		long cur = System.currentTimeMillis();
 		if ((t + TIMEOUT_MILLISECONDS) < cur) {
 			throw new SignatureException("signature time timeout: msg timestamp --> " + t +", system timestamp --> " + cur, ERR_TIMEOUT);
 		}
 		// 签名值计算
 		String signedString = getSignedString(map, secret);
 		String signature = (String) map.get(PARAM_SIGNATURE);
-		if (!signedString.equals(signature)) {
+		if (!Objects.equals(signedString, signature)) {
 			throw new SignatureException("signature invalid, value --> " + obj2JsonString(map), ERR_SIGN);
 		}
 	}
@@ -94,10 +92,8 @@ public class SignatureUtil {
 	private static String getSignedString(TreeMap<String, Object> map, String secret) {
 		try {
 			StringBuilder sb = new StringBuilder();
-			
-			Iterator<String> itr = map.keySet().iterator();
-			while(itr.hasNext()) {
-				String k = itr.next();
+
+			for (String k : map.keySet()) {
 				if (PARAM_SIGNATURE.equals(k)) {
 					continue;
 				}
@@ -137,10 +133,11 @@ public class SignatureUtil {
 		return null;
 	}
 	
+	@SuppressWarnings("unused")
 	public static class SignatureException extends RuntimeException {
 		private static final long serialVersionUID = 1L;
 		private int errorCode;
-		
+
 		public SignatureException() {
 			super();
 		}
@@ -157,7 +154,7 @@ public class SignatureUtil {
 	}
 	
 	public static void main(String[] args) {
-		Map<String, Object> inParams = new HashMap<String, Object>();
+		Map<String, Object> inParams = new HashMap<>();
 		inParams.put("id", 8);
 		inParams.put("name", "lalalalala");
 		inParams.put("state", "normal");

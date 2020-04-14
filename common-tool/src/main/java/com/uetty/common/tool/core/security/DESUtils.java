@@ -10,19 +10,11 @@ public class DESUtils {
 
     private final static String DES = "DES";
 
-
-    public static void main(String[] args) throws Exception {
-    	
-    }
-    
     /**
      * Description 根据键值进行加密
-     * 
-     * @param data
-     * @param key
-     *            加密键byte数组
-     * @return
-     * @throws Exception
+     * @param data 数据byte数组
+     * @param key 加密键byte数组
+     * @return 加密后的byte数组
      */
     public static byte[] encrypt(byte[] data, byte[] key) throws Exception {
         // 生成一个可信任的随机数源
@@ -47,11 +39,9 @@ public class DESUtils {
     /**
      * Description 根据键值进行解密
      * 
-     * @param data
-     * @param key
-     *            加密键byte数组
-     * @return
-     * @throws Exception
+     * @param data 数据byte数组
+     * @param key 加密键byte数组
+     * @return 加密后的byte数组
      */
     public static byte[] decrypt(byte[] data, byte[] key) throws Exception {
         // 生成一个可信任的随机数源

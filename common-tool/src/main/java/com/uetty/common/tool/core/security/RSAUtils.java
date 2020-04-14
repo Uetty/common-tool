@@ -16,7 +16,7 @@ public class RSAUtils {
      * 加密算法RSA
      */
     public static final String KEY_ALGORITHM = "RSA";
-    
+
     /**
      * 签名算法
      */
@@ -26,7 +26,7 @@ public class RSAUtils {
      * RSA最大加密明文大小
      */
     private static final int MAX_ENCRYPT_BLOCK = 117;
-    
+
     /**
      * RSA最大解密密文大小
      */
@@ -36,33 +36,27 @@ public class RSAUtils {
      * <p>
      * 生成密钥对(公钥和私钥)
      * </p>
-     * 
-     * @return
-     * @throws Exception
      */
-    public static void generateKey() throws Exception {
-    	KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
-		gen.initialize(1024);
-		KeyPair keyPair = gen.generateKeyPair();
-		
-		RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
-		RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
-		System.out.println("--------");
-		Encoder b64e = Base64.getEncoder();
-		System.out.println(b64e.encodeToString(publicKey.getEncoded()));
-		System.out.println(b64e.encodeToString(privateKey.getEncoded()));
+    public static String[] generateKey() throws Exception {
+        KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
+        gen.initialize(1024);
+        KeyPair keyPair = gen.generateKeyPair();
+
+        RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
+        RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
+        Encoder b64e = Base64.getEncoder();
+        return new String[] {
+                b64e.encodeToString(privateKey.getEncoded()),
+                b64e.encodeToString(publicKey.getEncoded())
+        };
     }
-    
+
     /**
      * <p>
      * 用私钥对信息生成数字签名
      * </p>
-     * 
      * @param data 已加密数据
      * @param privateKey 私钥(BASE64编码)
-     * 
-     * @return
-     * @throws Exception
      */
     public static String sign(byte[] data, String privateKey) throws Exception {
         byte[] keyBytes = Base64.getDecoder().decode(privateKey);
@@ -79,14 +73,10 @@ public class RSAUtils {
      * <p>
      * 校验数字签名
      * </p>
-     * 
      * @param data 已加密数据
      * @param publicKey 公钥(BASE64编码)
      * @param sign 数字签名
-     * 
-     * @return
-     * @throws Exception
-     * 
+     *
      */
     public static boolean verify(byte[] data, String publicKey, String sign)
             throws Exception {
@@ -104,11 +94,8 @@ public class RSAUtils {
      * <P>
      * 私钥解密
      * </p>
-     * 
      * @param encryptedData 已加密数据
      * @param privateKey 私钥(BASE64编码)
-     * @return
-     * @throws Exception
      */
     public static byte[] decryptByPrivateKey(byte[] encryptedData, String privateKey)
             throws Exception {
@@ -143,11 +130,8 @@ public class RSAUtils {
      * <p>
      * 公钥解密
      * </p>
-     * 
      * @param encryptedData 已加密数据
      * @param publicKey 公钥(BASE64编码)
-     * @return
-     * @throws Exception
      */
     public static byte[] decryptByPublicKey(byte[] encryptedData, String publicKey)
             throws Exception {
@@ -182,11 +166,8 @@ public class RSAUtils {
      * <p>
      * 公钥加密
      * </p>
-     * 
      * @param data 源数据
      * @param publicKey 公钥(BASE64编码)
-     * @return
-     * @throws Exception
      */
     public static byte[] encryptByPublicKey(byte[] data, String publicKey)
             throws Exception {
@@ -222,11 +203,8 @@ public class RSAUtils {
      * <p>
      * 私钥加密
      * </p>
-     * 
      * @param data 源数据
      * @param privateKey 私钥(BASE64编码)
-     * @return
-     * @throws Exception
      */
     public static byte[] encryptByPrivateKey(byte[] data, String privateKey)
             throws Exception {
@@ -256,8 +234,12 @@ public class RSAUtils {
         out.close();
         return encryptedData;
     }
-    
+
     public static void main(String[] args) throws Exception{
-    	generateKey();
+        System.out.println("--------");
+        String[] keys = generateKey();
+        System.out.println(keys[0]);
+        System.out.println("--------");
+        System.out.println(keys[1]);
     }
 }

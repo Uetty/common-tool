@@ -1,23 +1,22 @@
 package com.uetty.common.tool.core.security;
 
 import javax.crypto.KeyGenerator;
-import java.io.IOException;
 import java.security.Key;
 import java.util.Base64;
 
 public class DESHelper {
 
-	private final static String key = "UryUswpQ98=";
-
 	public static void main(String[] args) throws Exception {
-		// TODO Auto-generated method stub
+		System.out.println(generateKey());
+
 		String str = "e111113";
-		String encode = encrypt(str, null);
+		String key = "UryUswpQ98=";
+		String encode = encrypt(str, null, key);
 		System.out.println(encode);
-		System.out.println(decrypt(encode, null));
+		System.out.println(decrypt(encode, null, key));
 	}
 
-	public static String encrypt(String data, String charset) throws Exception {
+	public static String encrypt(String data, String charset, String key) throws Exception {
 		byte[] bytes;
 		if(charset != null){
 			bytes = DESUtils.encrypt(data.getBytes(charset), key.getBytes());
@@ -29,12 +28,8 @@ public class DESHelper {
 
 	/**
 	 * 使用 默认key 解密
-	 * 
-	 * @return String
-	 * @author lifq
-	 * @date 2015-3-17 下午02:49:52
 	 */
-	public static String decrypt(String data, String charset) throws IOException, Exception {
+	public static String decrypt(String data, String charset, String key) throws Exception {
 		byte[] bytes = hexString2Bytes(data);
 		byte[] bt = DESUtils.decrypt(bytes, key.getBytes());
 		if(charset != null){
@@ -48,28 +43,28 @@ public class DESHelper {
         int l = src.length() / 2;  
         byte[] ret = new byte[l];  
         for (int i = 0; i < l; i++) {  
-            ret[i] = (byte) Integer  
+            ret[i] = Integer
                     .valueOf(src.substring(i * 2, i * 2 + 2), 16).byteValue();  
         }  
         return ret;  
     }
 
 	private static String bytes2HexString(byte[] b) {
-		String ret = "";
-		for (int i = 0; i < b.length; i++) {
-			String hex = Integer.toHexString(b[i] & 0xFF);
+		StringBuilder ret = new StringBuilder();
+		for (byte value : b) {
+			String hex = Integer.toHexString(value & 0xFF);
 			if (hex.length() == 1) {
 				hex = '0' + hex;
 			}
-			ret += hex;
+			ret.append(hex);
 		}
-		return ret;
+		return ret.toString();
 	}
 	
-	public static void generateKey() throws Exception {
+	public static String generateKey() throws Exception {
     	KeyGenerator kg = KeyGenerator.getInstance("DES");
     	Key key = kg.generateKey();
-    	System.out.println(Base64.getEncoder().encodeToString(key.getEncoded()));
+    	return Base64.getEncoder().encodeToString(key.getEncoded());
     }
 
 }

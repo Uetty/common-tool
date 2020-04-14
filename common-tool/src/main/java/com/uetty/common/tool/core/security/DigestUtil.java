@@ -12,6 +12,7 @@ import java.security.NoSuchAlgorithmException;
  * @author Vince
  * @date 2020/1/7 12:32
  */
+@SuppressWarnings("unused")
 public class DigestUtil {
 
     public static String md5Sum(String str) throws NoSuchAlgorithmException {
