@@ -162,4 +162,9 @@ public class StringUtil {
 		return (str != null && prefix != null && str.length() >= prefix.length() &&
 				str.regionMatches(true, 0, prefix, 0, prefix.length()));
 	}
+
+	public static boolean startsWith(String str, String prefix) {
+		return (str != null && prefix != null && str.length() >= prefix.length() &&
+				str.regionMatches(false, 0, prefix, 0, prefix.length()));
+	}
 }
