@@ -157,4 +157,9 @@ public class StringUtil {
 		}
 		return true;
 	}
+
+	public static boolean startsWithIgnoreCase(String str, String prefix) {
+		return (str != null && prefix != null && str.length() >= prefix.length() &&
+				str.regionMatches(true, 0, prefix, 0, prefix.length()));
+	}
 }
