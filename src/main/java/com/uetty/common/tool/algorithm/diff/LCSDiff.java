@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -179,6 +180,7 @@ public class LCSDiff {
     }
 
     @SuppressWarnings("unused")
+    static
     class MetadataSpec {
         int start;
         int end;
@@ -236,8 +238,8 @@ public class LCSDiff {
     }
 
     public static void main(String[] args) throws IOException {
-        String str1 = FileUtils.readFileToString(new File("C:\\Users\\Vince\\Desktop\\re.txt"), Charset.forName("utf-8"));
-        String str2 = FileUtils.readFileToString(new File("C:\\Users\\Vince\\Desktop\\rr.txt"), Charset.forName("utf-8"));
+        String str1 = FileUtils.readFileToString(new File("C:\\Users\\Vince\\Desktop\\re.txt"), StandardCharsets.UTF_8);
+        String str2 = FileUtils.readFileToString(new File("C:\\Users\\Vince\\Desktop\\rr.txt"), StandardCharsets.UTF_8);
 
         // diff算法比较耗内存，一般代码文件字符数较多，使用EnglishWordMetadataBuilder模式，较少内存消耗
         // EnglishWordMetadataBuilder模式，将英文单词作为不可分割的数据元来比较，适合代码等相似风格的文件文本比较
