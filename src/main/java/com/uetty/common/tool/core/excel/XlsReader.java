@@ -54,9 +54,6 @@ public class XlsReader {
 		this.file = file;
 	}
 
-	/**
-	 * 读取excel文件获得HSSFWorkbook对象
-	 */
 	public void open() throws IOException {
 		FileInputStream fis = new FileInputStream(file);
 		wb = new HSSFWorkbook(new POIFSFileSystem(fis));
@@ -90,6 +87,8 @@ public class XlsReader {
 
 	/**
 	 * 读取指定sheetNum的rowCount
+	 * @param sheetNum 标签页位置
+	 * @return 行数
 	 */
 	public int getRowCount(int sheetNum) {
 		HSSFSheet sheet = wb.getSheetAt(sheetNum);
@@ -98,16 +97,10 @@ public class XlsReader {
 		return rowCount;
 	}
 
-	/**
-	 * 得到指定行的内容
-	 */
 	public String[] readExcelLine(int lineNum) {
 		return readExcelLine(this.sheetNum, lineNum);
 	}
 
-	/**
-	 * 指定工作表和行数的内容
-	 */
 	public String[] readExcelLine(int sheetNum, int lineNum) {
 		if (sheetNum < 0 || lineNum < 0)
 			return null;
@@ -127,23 +120,14 @@ public class XlsReader {
 		return strExcelLine;
 	}
 
-	/**
-	 * 读取指定列的内容
-	 */
 	public String readStringExcelCell(int cellNum) {
 		return readStringExcelCell(this.rowNum, cellNum);
 	}
 
-	/**
-	 * 指定行和列编号的内容
-	 */
 	public String readStringExcelCell(int rowNum, int cellNum) {
 		return readStringExcelCell(this.sheetNum, rowNum, cellNum);
 	}
 
-	/**
-	 * 指定工作表、行、列下的内容
-	 */
 	public String readStringExcelCell(int sheetNum, int rowNum, int cellNum) {
 		if (sheetNum < 0 || rowNum < 0)
 			return "";
@@ -166,9 +150,9 @@ public class XlsReader {
 				case HSSFCell.CELL_TYPE_STRING:
 					strExcelCell = row.getCell(cellNum).getStringCellValue();
 					break;
-				case HSSFCell.CELL_TYPE_BLANK:
-					strExcelCell = "";
-					break;
+//				case HSSFCell.CELL_TYPE_BLANK:
+//					strExcelCell = "";
+//					break;
 				default:
 					strExcelCell = "";
 					break;

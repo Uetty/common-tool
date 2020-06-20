@@ -44,6 +44,7 @@ public class FileTool {
 	 * 输入流的数据输出到输出流
 	 * @param os 输出流
 	 * @param is 输入流
+	 * @throws IOException io exception
 	 */
 	public static void writeFromInputStream(OutputStream os, InputStream is) throws IOException {
 		int len;

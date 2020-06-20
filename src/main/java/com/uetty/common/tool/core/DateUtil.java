@@ -63,6 +63,7 @@ public class DateUtil {
 	 * @param format 匹配格式
 	 * @param date 时间
 	 * @return 返回按匹配格式反序列化的日期类
+	 * @throws ParseException parse exception
 	 */
 	public static Date toDate(String format, String date) throws ParseException {
 		if (date == null) {

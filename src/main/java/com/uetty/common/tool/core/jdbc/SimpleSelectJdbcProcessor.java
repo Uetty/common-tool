@@ -100,9 +100,6 @@ public abstract class SimpleSelectJdbcProcessor<T> {
 		return joinMap;
 	}
 	
-	/**
-	 * 列表查询
-	 */
 	@SuppressWarnings("UnusedAssignment")
 	public List<T> searchList(Connection conn) {
 		PreparedStatement pstmt = null;
@@ -176,9 +173,6 @@ public abstract class SimpleSelectJdbcProcessor<T> {
 		return list;
 	}
 	
-	/**
-	 * count查询
-	 */
 	@SuppressWarnings("UnusedAssignment")
 	public long searchCount(Connection conn) {
 		PreparedStatement pstmt = null;

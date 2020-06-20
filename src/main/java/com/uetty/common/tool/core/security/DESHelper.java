@@ -26,9 +26,6 @@ public class DESHelper {
 		return bytes2HexString(bytes);
 	}
 
-	/**
-	 * 使用 默认key 解密
-	 */
 	public static String decrypt(String data, String charset, String key) throws Exception {
 		byte[] bytes = hexString2Bytes(data);
 		byte[] bt = DESUtils.decrypt(bytes, key.getBytes());

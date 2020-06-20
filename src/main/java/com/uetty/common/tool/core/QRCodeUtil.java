@@ -159,6 +159,7 @@ public class QRCodeUtil {
     /**
      * 解析二维码
      * @param file 二维码图片
+     * @return 二维码解析后的文本
      * @throws IOException io exception
      * @throws NotFoundException not found qr code
      */

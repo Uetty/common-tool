@@ -218,6 +218,7 @@ public class ReflectUtil {
 	
 	/**
 	 * 打印该类包含的变量名
+	 * @param clz 类实例
 	 */
 	public static void printContainFieldNames(Class<?> clz) {
 		Set<String> fieldSet = new HashSet<>();
@@ -245,6 +246,7 @@ public class ReflectUtil {
 	/**
 	 * 打印类所在的文件路径
 	 * <p> 适合代码多个有包含相同类的jar出现bug时，借用该方法排除</p>
+	 * @param clz 类实例
 	 */
 	public static void printClassPath(Class<?> clz) {
 		String classFilePath = clz.getName();

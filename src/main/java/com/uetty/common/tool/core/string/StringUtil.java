@@ -13,6 +13,8 @@ public class StringUtil {
 
 	/**
 	 * 下划线命名转驼峰
+	 * @param str 下划线字符串
+	 * @return 驼峰字符串
 	 */
 	public static String underLineToCamelStyle (String str) {
 		for (int i = 0; i < str.length(); i++) {
@@ -32,6 +34,8 @@ public class StringUtil {
 	
 	/**
 	 * 驼峰命名转下划线
+	 * @param str 驼峰字符串
+	 * @return 下划线字符串
 	 */
 	public static String camelToUnderLineStyle (String str) {
 		for (int i = 0; i < str.length(); i++) {
@@ -48,6 +52,8 @@ public class StringUtil {
 
 	/**
 	 * 驼峰字符串改为空格分隔字符串
+	 * @param str 驼峰字符串
+	 * @return 空格分隔字符串
 	 */
 	public static String camelToBlankSeparate(String str) {
 		StringBuilder sb = new StringBuilder();

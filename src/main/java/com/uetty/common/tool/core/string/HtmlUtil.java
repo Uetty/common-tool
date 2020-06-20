@@ -103,6 +103,8 @@ public class HtmlUtil {
     }
     /**
      * 去除HTML标签
+	 * @param text html
+	 * @return 去除标签后
      */
     public static String escapeHtml(String text) {
         initEscapeHTMLMapping();
@@ -116,6 +118,8 @@ public class HtmlUtil {
     }
     /**
      * 去除脚本标签
+	 * @param text 可能包含脚本的字符串
+	 * @return 去除可能包含的脚本
      */
     public static String escapeScript(String text) {
         initEscapeScriptMapping();
@@ -137,6 +141,10 @@ public class HtmlUtil {
 
     /**
      * 查找html代码的指定标签，并根据函数替换内容
+	 * @param html html
+	 * @param tagName 标签名
+	 * @param mapper 针对该标签的处理
+	 * @return 处理这些标签后的文本
      */
     public static String tagReplace(String html, String tagName, BiFunction<String, String, String> mapper) {
         Objects.requireNonNull(mapper);
@@ -194,6 +202,12 @@ public class HtmlUtil {
 
     /**
      * 根据开闭标签的位置计算装载html标签键名区间块，方便后面按顺序进行replace工作
+	 * @param html html
+	 * @param openKeys 区块标签头部内容替换后的id值
+	 * @param closeKeys 区块标签尾部内容替换后的id值
+	 * @param openLocates 标签头位置值栈
+	 * @param closeLocates 标签尾位置值栈
+	 * @return 区块列表
      */
     private static List<Block> loadBlocks(String html, List<String> openKeys, List<String> closeKeys, int[] openLocates, int[] closeLocates) {
         List<Block> blocks = new ArrayList<>();
@@ -229,6 +243,8 @@ public class HtmlUtil {
 
     /**
      * 定位键名在文本中的位置
+	 * @param html html
+	 * @param keys 替换后的id值列表
 	 * @return int[] 位置列表
      */
     private static int[] locateKeys(String html, List<String> keys) {
@@ -240,7 +256,13 @@ public class HtmlUtil {
     }
 
     /**
-     * 标记html标签的位置
+     * 根据匹配规则找到匹配的内容，并分别替换为不重复的序列，记录替换后序列位置
+	 * @param html 原始html
+	 * @param op 匹配规则
+	 * @param matcher matcher实例
+	 * @param markMap 替换后id与原始字符串映射
+	 * @param keys 替换后id列表
+	 * @return 替换后html
      */
     private static String markTag(String html, Pattern op, Matcher matcher, Map<String, String> markMap, List<String> keys) {
         while (matcher.find()) {

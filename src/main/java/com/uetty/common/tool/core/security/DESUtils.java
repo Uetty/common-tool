@@ -4,6 +4,7 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
+import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 
 public class DESUtils {
@@ -15,8 +16,10 @@ public class DESUtils {
      * @param data 数据byte数组
      * @param key 加密键byte数组
      * @return 加密后的byte数组
+     * @throws GeneralSecurityException security exception
      */
-    public static byte[] encrypt(byte[] data, byte[] key) throws Exception {
+    public static byte[] encrypt(byte[] data, byte[] key)
+            throws GeneralSecurityException {
         // 生成一个可信任的随机数源
         SecureRandom sr = new SecureRandom();
 
@@ -42,8 +45,9 @@ public class DESUtils {
      * @param data 数据byte数组
      * @param key 加密键byte数组
      * @return 加密后的byte数组
+     * @throws GeneralSecurityException security exception
      */
-    public static byte[] decrypt(byte[] data, byte[] key) throws Exception {
+    public static byte[] decrypt(byte[] data, byte[] key) throws GeneralSecurityException {
         // 生成一个可信任的随机数源
         SecureRandom sr = new SecureRandom();
 

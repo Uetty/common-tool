@@ -3,6 +3,9 @@ package com.uetty.common.tool.core.string;
 public class UnicodeCoder {
 	/**
 	 * 字符串转为unicode值，参数二是否将ASCII字符转为unicode表示
+	 * @param str 字符串
+	 * @param encodeAscii ascii字符是否也要转为unicode表示
+	 * @return unicode格式表示字符串
 	 */
 	public static String encode(String str, boolean encodeAscii) {
 		StringBuilder sb = new StringBuilder();
@@ -15,6 +18,9 @@ public class UnicodeCoder {
 
 	/**
 	 * unicode值转为字符串
+	 * @param str unicode格式表示的字符串
+	 * @return 解码后字符串
+	 * @throws UnsupportDecodeException 不支持
 	 */
 	public static String decode(String str) throws UnsupportDecodeException {
 

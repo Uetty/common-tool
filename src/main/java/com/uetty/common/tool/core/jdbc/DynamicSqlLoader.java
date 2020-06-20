@@ -31,6 +31,8 @@ public class DynamicSqlLoader {
 	
 	/**
 	 * 设置某个命名空间的代码块是否显示
+	 * @param namespace 命名空间
+	 * @param isShow 是否显示
 	 */
 	public void setNamespaceMode(String namespace, boolean isShow) {
 		namespaceModeMap.put(namespace, isShow);

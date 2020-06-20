@@ -51,31 +51,23 @@ public class JexcelReader implements Closeable {
     
     /**
      * 获取标签页数量
+	 * @return 数量
      */
     public int getSheetNum() {
     	assertNoClosed();
     	return wb.getNumberOfSheets();
     }
     
-    /**
-     *  根据标签页序号获取标签页
-     */
     public Sheet getSheetAt(int index) {
     	assertNoClosed();
     	return wb.getSheet(index);
     }
     
-    /**
-     * 根据标签页名称获取标签页
-     */
     public Sheet getSheetByName(String name) {
     	assertNoClosed();
     	return wb.getSheet(name);
     }
     
-    /**
-     * 获取所有标签页名称
-     */
     public String[] getSheetNames() {
     	assertNoClosed();
     	return wb.getSheetNames();
@@ -86,6 +78,7 @@ public class JexcelReader implements Closeable {
      * @param sheetNum 标签页序号
      * @param row 第几行
      * @param col 第几列
+	 * @return cell
      */
     public Cell getCell(int sheetNum, int row, int col) {
     	assertNoClosed();
@@ -102,6 +95,7 @@ public class JexcelReader implements Closeable {
      * @param sheetNum 标签页序号
      * @param row 第几行
      * @param col 第几列
+	 * @return 值
      */
     public String getCellValue(int sheetNum, int row, int col) {
     	assertNoClosed();
@@ -115,9 +109,6 @@ public class JexcelReader implements Closeable {
     	return value;
     }
     
-    /**
-     * 将某个标签页的数据转换为二维数组
-     */
     public List<List<String>> toListList(int sheetNum) {
     	assertNoClosed();
     	Sheet sheet = wb.getSheet(sheetNum);
@@ -133,9 +124,6 @@ public class JexcelReader implements Closeable {
     	return listList;
     }
     
-    /**
-     * 获取某个标签页的某一行数据列表
-     */
     public List<String> getRowValue(int sheetNum, int rowNum) {
     	assertNoClosed();
     	Sheet sheet = wb.getSheet(sheetNum);
@@ -189,9 +177,6 @@ public class JexcelReader implements Closeable {
     	close();
     }
     
-    /**
-     * 是否已经关闭
-     */
 	public boolean isClosed() {
 		return closed;
 	}

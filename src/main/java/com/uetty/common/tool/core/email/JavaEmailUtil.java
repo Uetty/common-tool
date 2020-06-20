@@ -40,6 +40,9 @@ public class JavaEmailUtil {
 	 * 发送邮件
 	 * @param title 标题
 	 * @param fromName 显示的发送者名称
+	 * @param content 内容
+	 * @param toAddrs 地址
+	 * @param files 文件列表
 	 */
 	public static void sendEmailWithFile(String title, String fromName, String content, List<String> toAddrs,
 			List<File> files) {
@@ -107,6 +110,7 @@ public class JavaEmailUtil {
 		
 		/**
 		 * 是否准备好可以发送
+		 * @return 是否可以发送
 		 */
 		public boolean ready() {
 			synchronized (ResendableEmail.class) {
@@ -206,6 +210,7 @@ public class JavaEmailUtil {
 
 		/**
 		 * 添加等待发送的邮件资源
+		 * @param email 可重试发送的邮件
 		 */
 		public static void sendEmail(ResendableEmail email) {
 			synchronized (EmailService.class) {
@@ -217,6 +222,7 @@ public class JavaEmailUtil {
 
 		/**
 		 * 添加邮件资源
+		 * @param emails 可重试发送的多封邮件
 		 */
 		public static void sendEmails(List<ResendableEmail> emails) {
 			synchronized (EmailService.class) {

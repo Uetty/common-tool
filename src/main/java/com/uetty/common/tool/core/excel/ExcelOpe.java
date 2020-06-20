@@ -36,6 +36,7 @@ public class ExcelOpe {
 
     /**
      * 仅xls格式成功过
+     * @param is 输入流
      */
     public ExcelOpe(InputStream is) {
         POIFSFileSystem fs;
@@ -199,9 +200,6 @@ public class ExcelOpe {
         return cellStyle;
     }
 
-    /**
-     * 给Excel中的某个sheet的某个单元格赋值。.
-     */
     public Cell setCellValue(int sheetNo, int rowNum, int colNum, Object v, CellStyle cellStyle) {
         Cell cell = this.getCell(sheetNo, rowNum, colNum);
         if (v == null) {
@@ -237,9 +235,6 @@ public class ExcelOpe {
         return cell;
     }
 
-    /**
-     * 根据指定行列和sheet获取单元。.
-     */
     public Cell getCell(int sheetNo, int rowNum, int colNum) {
         Row row = getRow(sheetNo, rowNum);
         Cell cell = row.getCell(colNum);
@@ -251,7 +246,6 @@ public class ExcelOpe {
 
     /**
      * Gets the cell.
-     * 
      * @param colNumStr 列号
      * @param rowNum 行号
      * @param sheetNo sheet号
