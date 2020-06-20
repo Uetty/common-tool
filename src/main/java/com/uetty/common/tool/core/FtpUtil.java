@@ -22,8 +22,15 @@ public class FtpUtil {
 
 	/**
 	 * 获取ftp连接
+	 * @param host 主机地址
+	 * @param port 端口
+	 * @param username 用户名
+	 * @param password 密码
+	 * @param workDir 工作目录
+	 * @return 返回ftp client
+	 * @throws IOException io exception
 	 */
-	public static FTPClient connectFtp(String host, Integer port, String username, String password, String workDir) throws Exception {
+	public static FTPClient connectFtp(String host, Integer port, String username, String password, String workDir) throws IOException {
 		FTPClient ftp = new FTPClient();
 		int reply;
 		if (port == null) {
@@ -43,9 +50,6 @@ public class FtpUtil {
 		return ftp;
 	}
 
-	/**
-	 * 关闭ftp连接
-	 */
 	public static void closeFtp(FTPClient ftpClient) {
 		if (ftpClient != null && ftpClient.isConnected()) {
 			try {
@@ -188,9 +192,6 @@ public class FtpUtil {
 				}
 			}
 		}
-	}
-
-	public static void main(String[] args) {
 	}
 
 	@SuppressWarnings("ResultOfMethodCallIgnored")

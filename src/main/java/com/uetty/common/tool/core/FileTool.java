@@ -1,7 +1,5 @@
 package com.uetty.common.tool.core;
 
-import com.uetty.common.tool.constant.Global;
-
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -14,14 +12,13 @@ import java.util.function.Consumer;
 @SuppressWarnings({"ResultOfMethodCallIgnored", "WeakerAccess", "unused"})
 public class FileTool {
 
-	private static final String tmpFileDir = Global.TMP_FILE_DIR.getValue();
-
 	/**
 	 * 产生临时文件路径（随机文件名）
 	 * @param extName 扩展名
+	 * @param tmpFileDir 临时文件父级目录
 	 * @return 绝对路径
 	 */
-	public static String randomFilePathByExtName(String extName) {
+	public static String randomFilePathByExtName(String extName, String tmpFileDir) {
 		File directory = new File(tmpFileDir);
 		if (!directory.exists()) {
 			directory.mkdirs();
@@ -45,6 +42,8 @@ public class FileTool {
 	
 	/**
 	 * 输入流的数据输出到输出流
+	 * @param os 输出流
+	 * @param is 输入流
 	 */
 	public static void writeFromInputStream(OutputStream os, InputStream is) throws IOException {
 		int len;
@@ -209,6 +208,7 @@ public class FileTool {
 
 	/**
 	 * 是否windows系统
+	 * @return 返回bool
 	 */
 	public static boolean isWinOS() {
 		boolean isWinOS = false;

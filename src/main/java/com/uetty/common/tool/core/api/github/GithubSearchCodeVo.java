@@ -194,7 +194,8 @@ public class GithubSearchCodeVo extends GithubSearchBaseVo {
         }
 
         /**
-         * 是否真的匹配，针对github存在对字符串拆分匹配的情况
+         * 是否真的匹配，针对github存在对字符串拆分匹配的情况，需要重新进行一次完整字符串匹配验证
+         * @return 返回true或false
          */
         public Boolean getTrueMatch() {
             return trueMatch == null ? true : trueMatch;

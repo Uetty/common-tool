@@ -36,6 +36,8 @@ public class MultiQuickSort<T extends Comparable<T>> {
 	
 	/**
 	 * 当任务数达到多少时启用新线程
+	 * @param size 单线程数据量限制
+	 * @return 链式返回自身
 	 */
 	@SuppressWarnings("UnusedReturnValue")
 	public MultiQuickSort<T> setBusyLine(int size) {

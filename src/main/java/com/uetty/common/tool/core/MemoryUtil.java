@@ -173,6 +173,7 @@ public class MemoryUtil {
     private static final String[] UNIT = new String[] {"Bit", "KB", "MB", "GB", "TB"};
     /**
      * 可视化内存
+     * @param size 内存数值
      * @return 带单位的内存显示
      */
     public static String toHumanMemory(long size) {

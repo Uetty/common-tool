@@ -5,7 +5,7 @@ import com.itextpdf.text.Image;
 import com.itextpdf.text.pdf.PdfContentByte;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
-import com.itextpdf.text.pdf.PdfWriter;
+import com.uetty.common.tool.constant.Global;
 import com.uetty.common.tool.core.pdf.ExtFontRegistry;
 import freemarker.template.TemplateException;
 import org.apache.commons.beanutils.PropertyUtils;
@@ -23,6 +23,7 @@ import org.apache.poi.xwpf.converter.pdf.PdfOptions;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.security.GeneralSecurityException;
 import java.util.*;
 import java.util.zip.ZipEntry;
@@ -35,17 +36,18 @@ import java.util.zip.ZipOutputStream;
 @SuppressWarnings("unused")
 public class DocTool {
 
+	private static final String tmpFileDir = Global.TMP_FILE_DIR.getValue();
+
 	/**
 	 * 生成docx文件
-	 * <p>
-	 * 技术原理依据：docx文件本身是zip格式打包的，将zip包内部文件制作为模板，填充数据后重新打包就能生成docx文件
+	 * <p>技术原理依据：docx文件本身是zip格式打包的，将zip包内部文件制作为模板，填充数据后重新打包就能生成docx文件</p>
 	 * 
-	 * @param docxFile
-	 *            docx文件（作为样式模板）
-	 * @param ftlFileMap
-	 *            key(String): zip包内部相对根目录的路径， value(File): 制作的ftl文件
-	 * @param dataMap
-	 *            替换ftl模板标签的数据
+	 * @param docxFile docx文件（作为样式模板）
+	 * @param ftlFileMap key(String): zip包内部相对根目录的路径， value(File): 制作的ftl文件
+	 * @param dataMap 替换ftl模板标签的数据
+	 * @return 返回创建的文档文件
+	 * @throws IOException io exception
+	 * @throws TemplateException template exception
 	 */
 	@SuppressWarnings("ResultOfMethodCallIgnored")
 	public static File createDocx(File docxFile, Map<String, File> ftlFileMap, Map<String, Object> dataMap)
@@ -60,12 +62,12 @@ public class DocTool {
 			// freemarker处理模板文件，生成临时文件
 			for (String key : ftlFileMap.keySet()) {
 				File ftlFile = ftlFileMap.get(key);
-				String entryFilePath = FileTool.randomFilePathByExtName(null);
+				String entryFilePath = FileTool.randomFilePathByExtName(null, tmpFileDir);
 				File entryFile = FreemarkerEngine.process(dataMap, ftlFile.getAbsolutePath(), entryFilePath);
 				entryFileMap.put(key, entryFile);
 			}
 
-			outFile = new File(FileTool.randomFilePathByExtName("docx"));
+			outFile = new File(FileTool.randomFilePathByExtName("docx", tmpFileDir));
 
 			zipFile = new ZipFile(docxFile);
 			zipout = new ZipOutputStream(new FileOutputStream(outFile));
@@ -104,6 +106,10 @@ public class DocTool {
 
 	/**
 	 * docx文件转pdf文件
+	 * @param docxFile 输入的docx文件
+	 * @param outFile 输出的pdf文件
+	 * @throws XWPFConverterException xwpf convert
+	 * @throws IOException io exception
 	 */
 	public static void docxConvertToPdf(File docxFile, File outFile) throws XWPFConverterException, IOException {
 		InputStream source = new FileInputStream(docxFile);
@@ -121,6 +127,12 @@ public class DocTool {
 
 	/**
 	 * 给docx文件添加open密码
+	 * @param docxFile 输入的docx文件
+	 * @param outFile 输出的docx文件
+	 * @param password 要增加的密码
+	 * @throws InvalidFormatException invalid format exception
+	 * @throws IOException ioexception
+	 * @throws GeneralSecurityException general security exception
 	 */
 	public static void docxAddPassword(File docxFile, File outFile, String password)
 			throws InvalidFormatException, IOException, GeneralSecurityException {
@@ -146,9 +158,14 @@ public class DocTool {
 
 	/**
 	 * pdf插入水印
+	 * @param inPdfPath 输入的pdf文件
+	 * @param outPdfPath 输出的pdf文件
+	 * @param imageLocalAddr 插入的水印图片路径
+	 * @throws IOException 读写时异常
+	 * @throws DocumentException 文档异常
 	 */
 	@SuppressWarnings("ResultOfMethodCallIgnored")
-	public static void insertWaterImage(PdfWriter writer, String inPdfPath, String outPdfPath, String imageLocalAddr)
+	public static void insertWaterImage(String inPdfPath, String outPdfPath, String imageLocalAddr)
 			throws IOException, DocumentException {
 		PdfReader reader = null;
 		PdfStamper stamp = null;
@@ -188,18 +205,17 @@ public class DocTool {
 	/**
 	 * 按指定的表头和数据，在指定的路径生成excel文件
 	 * 
-	 * @param path
-	 *            导出路径
-	 * @param sheetTitle
-	 *            Excel的sheet标题
-	 * @param headMap
-	 *            表格第一行表头,类型为LinkedHashMap
-	 * @param dataList
-	 *            对应的数据
+	 * @param path 导出路径
+	 * @param sheetTitle Excel的sheet标题
+	 * @param headMap 表格第一行表头,类型为LinkedHashMap
+	 * @param dataList 对应的数据
 	 * @return 是否导出成功
+	 * @throws IllegalAccessException illegal access
+	 * @throws NoSuchMethodException no such method
+	 * @throws InvocationTargetException invocation target
 	 */
 	public static boolean exportExcel(String path, String sheetTitle, LinkedHashMap<String, String> headMap,
-			List<Object> dataList) throws Exception {
+			List<Object> dataList) throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 		Set<String> keySet = headMap.keySet();
 		Iterator<String> iter = keySet.iterator();
 		List<String> values = new ArrayList<>();
@@ -248,7 +264,11 @@ public class DocTool {
 	}
 
 	/**
-	 * 文件写出
+	 * 写到excel文件
+	 * @param wb workbook
+	 * @param path path
+	 * @param fileName  file name
+	 * @return is success
 	 */
 	@SuppressWarnings({"UnusedReturnValue", "ReturnInsideFinallyBlock"})
 	public static boolean writeExcelFile(HSSFWorkbook wb, String path, String fileName) {
@@ -274,6 +294,7 @@ public class DocTool {
 
 	/**
 	 * 如果文件存在，则删除子文件，不存在则新建
+	 * @param dir 删除的文件的父级目录
 	 */
 	@SuppressWarnings("ResultOfMethodCallIgnored")
 	public static void deleteExistFiles(String dir) {
@@ -295,10 +316,11 @@ public class DocTool {
 
 	/**
 	 * 删除指定的文件
+	 * @param file 删除的文件
 	 */
 	@SuppressWarnings("ResultOfMethodCallIgnored")
-	public static void deleteExistFile(String dir) {
-		File files = new File(dir);
+	public static void deleteExistFile(String file) {
+		File files = new File(file);
 		if (files.exists()) {
 			files.delete();
 		}
@@ -306,7 +328,9 @@ public class DocTool {
 	}
 
 	/**
-	 * 写出客户端下载
+	 * 写出到指定文件
+	 * @param os out put stream
+	 * @param file target file
 	 */
 	public static void outputExcel(OutputStream os, File file) {
 		int fileLength = (int) file.length();

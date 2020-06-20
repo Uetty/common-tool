@@ -19,6 +19,8 @@ public class PinyinTool {
 	
 	/**
 	 * 汉字转为小写拼音
+	 * @param str 汉字
+	 * @return 小写拼音
 	 */
 	public static String toPinyinString(String str) {
 		HanyuPinyinOutputFormat format = new HanyuPinyinOutputFormat();
@@ -44,6 +46,8 @@ public class PinyinTool {
 	
 	/**
 	 * 汉字转拼音，带音标
+	 * @param str 汉字
+	 * @return 小写拼音（带音标）
 	 */
 	public static String toPinyinWithTone(String str) {
 		HanyuPinyinOutputFormat format = new HanyuPinyinOutputFormat();
@@ -69,6 +73,8 @@ public class PinyinTool {
 	
 	/**
 	 * 汉字转为大写拼音首字母
+	 * @param name 汉字名
+	 * @return 拼音首字母（大写）
 	 */
 	public static String toPinyinAbbreviation(String name) {
 		HanyuPinyinOutputFormat format = new HanyuPinyinOutputFormat();
@@ -92,10 +98,4 @@ public class PinyinTool {
 		return sb.toString();
 	}
 	
-	public static void main(String[] args) {
-		System.out.println(toPinyinAbbreviation("慕容风"));
-		System.out.println(toPinyinWithTone("耶律和"));
-		System.out.println(toPinyinWithTone("慕容风"));
-		System.out.println(toPinyinString("耶律和"));
-	}
 }

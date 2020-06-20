@@ -37,14 +37,19 @@ public abstract class AbstractApiTokenManager<T> {
 
     /**
      * 重置token的下次冷却时间
+     * @param tokenNode 需要重置冷却时间的token节点
      */
     protected abstract void resetNextColdDownTimestamp(TokenNode tokenNode);
     /**
-     * 获取最新的token列表
+     * 获取最新的token列表，因为这里token列表都是在jvm内存存储，有可能有需要定期更新的需求
+     * @return 返回最新的token列表（从数据库或其他地方）
      */
     protected abstract List<T> getNewestTokenList();
     /**
      * token的equals规则
+     * @param token1 token1
+     * @param token2 token2
+     * @return 返回是否equals
      */
     protected abstract boolean tokenEquals(T token1, T token2);
 
@@ -103,6 +108,7 @@ public abstract class AbstractApiTokenManager<T> {
 
     /**
      * queue中的下一个token是否可租借，如果可用则返回，不可用则返回空
+     * @return 返回包含租借成功的token的包装类实例
      */
     private TokenRenter rentNextTokenIfAvailable() {
         try {
@@ -135,6 +141,7 @@ public abstract class AbstractApiTokenManager<T> {
 
     /**
      * 多次循环rentNextTokenIfAvailable，把队列中的所有token都遍历一遍
+     * @return 返回包含租借成功的token的包装类实例
      */
     private TokenRenter loopGetToken() {
         int size = tokenQueue.size();
@@ -149,6 +156,8 @@ public abstract class AbstractApiTokenManager<T> {
 
     /**
      * 尝试获取可用的Token，如果在限制时间内不能获取token，则返回null
+     * @param delay 等待时间，超出等待时间，则获取失败
+     * @return 返回包含租借成功的token的包装类实例
      */
     public TokenRenter tryGetAvailableToken(long delay) {
         long time = System.currentTimeMillis();

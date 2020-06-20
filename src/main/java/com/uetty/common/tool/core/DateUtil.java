@@ -13,6 +13,9 @@ public class DateUtil {
 	
 	/**
 	 * 时间格式化为字符串
+	 * @param format 匹配格式
+	 * @param date 时间
+	 * @return 返回按匹配格式格式化后的时间字符串
 	 */
 	public static String format(String format, Date date) {
 		SimpleDateFormat sdf = new SimpleDateFormat(format);
@@ -20,8 +23,10 @@ public class DateUtil {
 	}
 
 	/**
-	 * 时间格式化为字符串
-	 * 默认返回空字符串
+	 * 时间格式化为字符串，默认返回空字符串
+	 * @param format 匹配格式
+	 * @param date 时间
+	 * @return 返回按匹配格式格式化后的时间字符串
 	 */
 	public static String formatIgnoreNull(String format, Date date) {
 		if (date == null) {
@@ -31,8 +36,10 @@ public class DateUtil {
 	}
 	
 	/**
-	 * 时间格式化为字符串
-	 * 默认返回空字符串
+	 * 时间格式化为字符串，默认返回空字符串
+	 * @param format 匹配格式
+	 * @param timestamp 时间戳
+	 * @return 返回按匹配格式格式化后的时间字符串
 	 */
 	public static String formatIgnoreNull(String format, Long timestamp) {
 		if (timestamp == null) {
@@ -53,6 +60,9 @@ public class DateUtil {
 	
 	/**
 	 * 字符串转时间
+	 * @param format 匹配格式
+	 * @param date 时间
+	 * @return 返回按匹配格式反序列化的日期类
 	 */
 	public static Date toDate(String format, String date) throws ParseException {
 		if (date == null) {
@@ -67,6 +77,8 @@ public class DateUtil {
 
 	/**
 	 * 一天的起始时间戳
+	 * @param date 时间
+	 * @return 返回指定日期开始的第一毫秒的时间戳
 	 */
 	public static long timestampOfDayStart(Date date){
 //		long time = date.getTime();
@@ -76,6 +88,8 @@ public class DateUtil {
 	
 	/**
 	 * 一天的起始时间
+	 * @param date 时间
+	 * @return 返回指定日期开始的第一毫秒的日期类
 	 */
 	public static Date dateOfDayStart(Date date){
 		Calendar c = Calendar.getInstance();

@@ -6,8 +6,8 @@ import java.net.URI;
 /**
  * 某些特殊需求可能需要输出的文件名与本地存储的文件名不同
  * @author : Vince
- * @date: 2019/8/7 17:19
  */
+@SuppressWarnings("unused")
 public class MailFile extends File {
 
     String fileName;

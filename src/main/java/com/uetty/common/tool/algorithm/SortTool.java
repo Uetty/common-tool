@@ -9,6 +9,7 @@ public class SortTool {
 	/**
 	 * 选择排序
 	 * <p>每次与最大值相比，找出最大值的位置
+	 * @param list 需要排序的列表
 	 */
 	public static void selectionSort(List<Integer> list) {
 		for (int lastIndex = list.size() - 1; lastIndex > 0; lastIndex--) {// 最大值最终安放的位置
@@ -32,6 +33,7 @@ public class SortTool {
 	/**
 	 * 冒泡排序
 	 * <p>每次比相邻元素，将更大元素一级一级推到最后面（就跟冒泡一样）
+	 * @param list 需要排序的列表
 	 */
 	public static void bubbleSort(List<Integer> list) {
 		for (int lastIndex = list.size() - 1; lastIndex > 0; lastIndex--) {// 最大值冒泡到的位置
@@ -56,6 +58,9 @@ public class SortTool {
 	/**
 	 * 快速排序中值归位
 	 * <p>把更大的数放右边，更小的数放左边（左右交替收缩范围进行，保证上次置换的出值位置作为本次置换的入值位置）
+	 * @param list 需要排序的列表
+	 * @param left 左边位置
+	 * @param right 右边位置
 	 */
 	private static void quickSortMedianPlace(List<Integer> list, int left, int right) {
 		if (left >= right) return;
@@ -110,13 +115,14 @@ public class SortTool {
 	/**
 	 * 快速排序
 	 * <p>把更大的数放右边，更小的数放左边（左右交替收缩范围进行，保证上次置换的出值位置作为本次置换的入值位置），并递归
+	 * @param list 需要排序的列表
 	 */
-	public static void quickSort(List<Integer> source) {
-		quickSortMedianPlace(source, 0, source.size() - 1);
+	public static void quickSort(List<Integer> list) {
+		quickSortMedianPlace(list, 0, list.size() - 1);
 	}
 	
-	public static void multiQuickSort(List<Integer> source) {
-		MultiQuickSort<Integer> quickSort = new MultiQuickSort<>(source);
+	public static void multiQuickSort(List<Integer> list) {
+		MultiQuickSort<Integer> quickSort = new MultiQuickSort<>(list);
 		quickSort.setBusyLine(300000);
 		quickSort.execute();
 	}

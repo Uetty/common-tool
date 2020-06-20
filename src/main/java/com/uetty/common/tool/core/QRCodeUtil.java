@@ -118,6 +118,9 @@ public class QRCodeUtil {
      * @param content 内容
      * @param logoImgPath LOGO地址
      * @param output 输出流
+     * @param level 容错级别
+     * @throws IOException io exception
+     * @throws WriterException writer exception
      */
     public static void createQRCode(String content, String logoImgPath, OutputStream output, ErrorCorrectionLevel level)
             throws IOException, WriterException {
@@ -156,6 +159,8 @@ public class QRCodeUtil {
     /**
      * 解析二维码
      * @param file 二维码图片
+     * @throws IOException io exception
+     * @throws NotFoundException not found qr code
      */
     public static String readFromQRCode(File file) throws IOException, NotFoundException {
         BufferedImage image = ImageIO.read(file);

@@ -8,6 +8,8 @@ public class NativeDigitAlgorithm {
 
 	/**
 	 * 相反数运算
+	 * @param n 数值
+	 * @return 返回相反数
 	 */
 	public static int contrary(int n) {
 //		n = n ^ -1;
@@ -16,6 +18,9 @@ public class NativeDigitAlgorithm {
 	
 	/**
 	 * 加法运算
+	 * @param n1 数值1
+	 * @param n2 数值2
+	 * @return 返回它们的和
 	 */
 	public static int add(int n1, int n2) {
 		while(n2 != 0) {
@@ -29,6 +34,9 @@ public class NativeDigitAlgorithm {
 	
 	/**
 	 * 乘法运算
+	 * @param n1 数值1
+	 * @param n2 数值2
+	 * @return  返回它们的积
 	 */
 	public static int multiple(int n1, int n2) {
 		boolean positive = n1 > 0 && n2 > 0 || n1 < 0 && n2 < 0;
@@ -54,6 +62,8 @@ public class NativeDigitAlgorithm {
 	
 	/**
 	 * 二进制数位数计算
+	 * @param n 数值
+	 * @return 返回二进制（复数按正数算）表示有多少位
 	 */
 	public static int unitCount(int n) {
 		if (n == 0) return 1;
@@ -68,6 +78,9 @@ public class NativeDigitAlgorithm {
 	
 	/**
 	 * 除法运算
+	 * @param n1 数值1
+	 * @param n2 数值2
+	 * @return 返回n1 / n2的值
 	 */
 	public static int divide(int n1, int n2) {
 		assert(n2 != 0);
