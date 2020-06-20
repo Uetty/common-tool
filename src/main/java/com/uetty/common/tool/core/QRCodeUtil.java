@@ -24,31 +24,50 @@ public class QRCodeUtil {
     private static final int LOGO_WIDTH = 60;
     // LOGO高度
     private static final int LOGO_HEIGHT = 60;
+    // 白色边框宽度
+    private static final int MARGIN = 8;
 
     private static BufferedImage createImage(String content, String logoImgPath, ErrorCorrectionLevel errorCorrectionLevel) throws WriterException, IOException {
         Map<EncodeHintType, Object> hints = new HashMap<>();
         // 容错级别，容错级别越高，生成的二维码信息量越大，密度也就越大
         hints.put(EncodeHintType.ERROR_CORRECTION, errorCorrectionLevel);
         hints.put(EncodeHintType.CHARACTER_SET, StandardCharsets.UTF_8.name());
-        hints.put(EncodeHintType.MARGIN, 1);
+        hints.put(EncodeHintType.MARGIN, 0);
         BitMatrix bitMatrix = new MultiFormatWriter().encode(content,
                 BarcodeFormat.QR_CODE, QRCODE_SIZE, QRCODE_SIZE, hints);
-        int width = bitMatrix.getWidth();
-        int height = bitMatrix.getHeight();
-        BufferedImage image = new BufferedImage(width, height,
+
+        int[] enclosingRectangle = bitMatrix.getEnclosingRectangle();
+        int qrcodeRealSize = enclosingRectangle[2] * QRCODE_SIZE / (QRCODE_SIZE - 2 * MARGIN);
+        int realMargin = (qrcodeRealSize - enclosingRectangle[2]) / 2;
+        BufferedImage image = new BufferedImage(qrcodeRealSize, qrcodeRealSize,
                 BufferedImage.TYPE_INT_RGB);
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                image.setRGB(x, y, bitMatrix.get(x, y) ? 0xFF000000
-                        : 0xFFFFFFFF);
+        for (int x = 0; x < qrcodeRealSize; x++) {
+            for (int y = 0; y < qrcodeRealSize; y++) {
+                boolean isBlack;
+                int enclosingX = x - realMargin;
+                int enclosingY = y - realMargin;
+                if (enclosingX < 0 || enclosingY < 0
+                        || enclosingX >= enclosingRectangle[2]
+                        || enclosingY >= enclosingRectangle[3]) {
+                    isBlack = false;
+                } else {
+                    isBlack = bitMatrix.get(enclosingX + enclosingRectangle[0], enclosingY + enclosingRectangle[1]);
+                }
+                image.setRGB(x , y,  isBlack ? 0xFF000000 : 0xFFFFFFFF);
             }
         }
+
+        BufferedImage zoom = new BufferedImage(QRCODE_SIZE, QRCODE_SIZE, image.getType());
+        Graphics graphics = zoom.getGraphics();
+        graphics.drawImage(image, 0, 0, QRCODE_SIZE, QRCODE_SIZE, null);
+        graphics.dispose();
+
         if (logoImgPath == null || "".equals(logoImgPath)) {
-            return image;
+            return zoom;
         }
         // 插入图片
-        embedImage(image, logoImgPath);
-        return image;
+        embedImage(zoom, logoImgPath);
+        return zoom;
     }
 
     /**
