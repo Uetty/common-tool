@@ -6,7 +6,7 @@
 
 	<groupId>com.uetty.tool</groupId>
 	<artifactId>common-tool</artifactId>
-	<version>2.0.1-ALPHA</version>
+	<version>2.0.2-BETA</version>
 
 	<name>common-tool</name>
 	<description>common tools and demos</description>
