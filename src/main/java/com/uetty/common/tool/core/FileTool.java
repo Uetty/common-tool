@@ -39,7 +39,7 @@ public class FileTool {
 		} while (f.exists());
 		return f.getAbsolutePath();
 	}
-	
+
 	/**
 	 * 输入流的数据输出到输出流
 	 * @param os 输出流
@@ -60,7 +60,15 @@ public class FileTool {
 			}
 		}
 	}
-	
+
+	/**
+	 * 将字符串写入到文件
+	 * @param file 文件
+	 * @param string 字符串
+	 * @param append true-添加到文件末尾，false-覆盖文件内容
+	 * @throws IOException io exception
+	 */
+	@SuppressWarnings("ResultOfMethodCallIgnored")
 	public static void writeToFile(File file, String string, boolean append) throws IOException {
 		if (!file.exists()) {
 			file.getParentFile().mkdirs();
@@ -70,7 +78,11 @@ public class FileTool {
 			fis.write(string.getBytes());
 		}
 	}
-	
+
+	/**
+	 * 文件路径是否绝对路径
+	 * @param path 路径
+	 */
 	public static boolean isAbsolutePath (String path) {
 		if (path.startsWith("/")) return true;
 		if (isWinOS()) {// windows
@@ -80,20 +92,42 @@ public class FileTool {
 		}
 	}
 
+	/**
+	 * 读取文件内容为字符串
+	 * @param file 文件
+	 * @throws IOException io exception
+	 */
 	public static String readToString(File file) throws IOException {
 		return readToString(file, StandardCharsets.UTF_8.name());
 	}
 
+	/**
+	 * 读取文件内容为字符串
+	 * @param file 文件
+	 * @param charset 编码格式
+	 * @throws IOException io exception
+	 */
 	public static String readToString(File file, String charset) throws IOException {
 		try (FileInputStream inputStream = new FileInputStream(file)) {
 			return readToString(inputStream, charset);
 		}
 	}
 
+	/**
+	 * 读取输入流为字符串
+	 * @param inputStream 输入流
+	 * @throws IOException io exception
+	 */
 	public static String readToString(InputStream inputStream) throws IOException {
 		return readToString(inputStream, StandardCharsets.UTF_8.name());
 	}
 
+	/**
+	 * 读取输入流为字符串
+	 * @param inputStream 输入流
+	 * @param charset 编码格式
+	 * @throws IOException io exception
+	 */
 	public static String readToString(InputStream inputStream, String charset) throws IOException {
 		try (InputStreamReader reader = new InputStreamReader(inputStream, charset)) {
 			StringBuilder writer = new StringBuilder();
@@ -106,22 +140,44 @@ public class FileTool {
 		}
 	}
 
+	/**
+	 * 文件内容读取为多行字符串
+	 * @param file 文件
+	 * @throws IOException io exception
+	 */
 	public static List<String> readLines(File file) throws IOException {
 		try (FileInputStream fis = new FileInputStream(file)) {
 			return readLines(fis, StandardCharsets.UTF_8.name());
 		}
 	}
 
+	/**
+	 * 文件内容读取为多行字符串
+	 * @param file 文件
+	 * @param charset 字符编码格式
+	 * @throws IOException io exception
+	 */
 	public static List<String> readLines(File file, String charset) throws IOException {
 		try (FileInputStream fis = new FileInputStream(file)) {
 			return readLines(fis, charset);
 		}
 	}
 
+	/**
+	 * 文件内容读取为多行字符串
+	 * @param inputStream 输入流
+	 * @throws IOException io exception
+	 */
 	public static List<String> readLines(InputStream inputStream) throws IOException {
 		return readLines(inputStream, StandardCharsets.UTF_8.name());
 	}
 
+	/**
+	 * 文件内容读取为多行字符串
+	 * @param inputStream 输入流
+	 * @param charset 字符编码格式
+	 * @throws IOException io exception
+	 */
 	public static List<String> readLines(InputStream inputStream, String charset) throws IOException {
 		List<String> list = new ArrayList<>();
 		try (InputStreamReader reader = new InputStreamReader(inputStream, charset);
@@ -135,20 +191,46 @@ public class FileTool {
 		return list;
 	}
 
+	/**
+	 * 一行行处理文件（考虑到文件可能太大，会对内存造成过大压力，通过consumer一行行处理）
+	 * @param file 文件
+	 * @param consumer 行字符串处理消费者
+	 * @throws IOException io exception
+	 */
 	public static void readLineByLine(File file, Consumer<String> consumer) throws IOException {
 		readLineByLine(file, StandardCharsets.UTF_8.name(), consumer);
 	}
 
+	/**
+	 * 一行行处理文件（考虑到文件可能太大，会对内存造成过大压力，通过consumer一行行处理）
+	 * @param file 文件
+	 * @param charset 字符编码
+	 * @param consumer 行字符串处理消费者
+	 * @throws IOException io exception
+	 */
 	public static void readLineByLine(File file, String charset, Consumer<String> consumer) throws IOException {
 		try (FileInputStream inputStream = new FileInputStream(file)) {
 			readLineByLine(inputStream, charset, consumer);
 		}
 	}
 
+	/**
+	 * 一行行处理字符串输入流（考虑到输入流可能太大，会对内存造成过大压力，通过consumer一行行处理）
+	 * @param inputStream 输入流
+	 * @param consumer 行字符串处理消费者
+	 * @throws IOException io exception
+	 */
 	public static void readLineByLine(InputStream inputStream, Consumer<String> consumer) throws IOException {
 		readLineByLine(inputStream, StandardCharsets.UTF_8.name(), consumer);
 	}
 
+	/**
+	 * 一行行处理字符串输入流（考虑到输入流可能太大，会对内存造成过大压力，通过consumer一行行处理）
+	 * @param inputStream 输入流
+	 * @param charset 字符编码格式
+	 * @param consumer 行字符串处理消费者
+	 * @throws IOException io exception   
+	 */
 	public static void readLineByLine(InputStream inputStream, String charset, Consumer<String> consumer) throws IOException {
 		try (InputStreamReader reader = new InputStreamReader(inputStream, charset);
 			 BufferedReader br = new BufferedReader(reader)) {
@@ -159,20 +241,50 @@ public class FileTool {
 		}
 	}
 
+	/**
+	 * 一组字符一组字符处理文件（考虑到文件可能太大，会对内存造成过大压力，通过consumer一组字符一组字符处理）
+	 * @param file 文件
+	 * @param maxLength 每组字符最大个数
+	 * @param consumer 处理消费者
+	 * @throws IOException io exception   
+	 */
 	public static void readCharByChar(File file, int maxLength, Consumer<char[]> consumer) throws IOException {
 		readCharByChar(file, StandardCharsets.UTF_8.name(), maxLength, consumer);
 	}
 
+	/**
+	 * 一组字符一组字符处理文件（考虑到文件可能太大，会对内存造成过大压力，通过consumer一组字符一组字符处理）
+	 * @param file 文件
+	 * @param charset 字符编码格式
+	 * @param maxLength 每组字符最大个数
+	 * @param consumer 处理消费者
+	 * @throws IOException io exception   
+	 */
 	public static void readCharByChar(File file, String charset, int maxLength, Consumer<char[]> consumer) throws IOException {
 		try (FileInputStream inputStream = new FileInputStream(file)) {
 			readCharByChar(inputStream, charset, maxLength, consumer);
 		}
 	}
 
+	/**
+	 * 一组字符一组字符处理输入流（考虑到输入流可能太大，会对内存造成过大压力，通过consumer一组字符一组字符处理）
+	 * @param inputStream 输入流
+	 * @param maxLength 每组字符最大个数
+	 * @param consumer 处理消费者
+	 * @throws IOException io exception   
+	 */
 	public static void readCharByChar(InputStream inputStream, int maxLength, Consumer<char[]> consumer) throws IOException {
 		readCharByChar(inputStream, StandardCharsets.UTF_8.name(), maxLength, consumer);
 	}
 
+	/**
+	 * 一组字符一组字符处理输入流（考虑到输入流可能太大，会对内存造成过大压力，通过consumer一组字符一组字符处理）
+	 * @param inputStream 输入流
+	 * @param charset 字符编码格式
+	 * @param maxLength 每组字符最大个数
+	 * @param consumer 处理消费者
+	 * @throws IOException io exception   
+	 */
 	public static void readCharByChar(InputStream inputStream, String charset, int maxLength, Consumer<char[]> consumer) throws IOException {
 		if (maxLength <= 0) {
 			maxLength = 1024;
@@ -188,12 +300,26 @@ public class FileTool {
 		}
 	}
 
+	/**
+	 * 一组字节一组字节处理文件（考虑到文件可能太大，会对内存造成过大压力，通过consumer一组字节一组字节处理）
+	 * @param file 文件
+	 * @param maxLength 每组字节最大个数
+	 * @param consumer 处理消费者
+	 * @throws IOException io exception   
+	 */
 	public static void readByteByByte(File file, int maxLength, Consumer<byte[]> consumer) throws IOException {
 		try (FileInputStream inputStream = new FileInputStream(file)) {
 			readByteByByte(inputStream, maxLength, consumer);
 		}
 	}
 
+	/**
+	 * 一组字节一组字节处理输入流（考虑到输入流可能太大，会对内存造成过大压力，通过consumer一组字节一组字节处理）
+	 * @param inputStream 输入流
+	 * @param maxLength 每组字节最大个数
+	 * @param consumer 处理消费者
+	 * @throws IOException io exception   
+	 */
 	public static void readByteByByte(InputStream inputStream, int maxLength, Consumer<byte[]> consumer) throws IOException {
 		if (maxLength <= 0) {
 			maxLength = 1024;
@@ -223,7 +349,14 @@ public class FileTool {
 		}
 		return isWinOS;
 	}
-	
+
+	/**
+	 * 打开jar中文件作为输入流返回
+	 * @param jarPath jar地址
+	 * @param filePath 文件相对路径
+	 * @return 输入流
+	 * @throws IOException io exception
+	 */
 	public static InputStream openFileInJar(String jarPath, String filePath) throws IOException {
 		if (!filePath.startsWith(File.separator)) {
 			filePath = File.separator + filePath;
@@ -232,21 +365,27 @@ public class FileTool {
 		URL url = new URL(urlPath);
 		return url.openStream();
 	}
-	
+
 	public static String getFileNamePrefix(String fileName) {
-        if (fileName == null || !fileName.contains(".")) return fileName;
-        int i = (fileName = fileName.trim()).lastIndexOf(".");
-        if (i <= 0) return fileName;
-        return fileName.substring(0, i);
-    }
+		if (fileName == null || !fileName.contains(".")) return fileName;
+		int i = (fileName = fileName.trim()).lastIndexOf(".");
+		if (i <= 0) return fileName;
+		return fileName.substring(0, i);
+	}
 
-    public static String getFileNameSuffix(String fileName) {
-        if (fileName == null || !fileName.contains(".")) return null;
-        int i = (fileName = fileName.trim()).lastIndexOf(".");
-        if (i <= 0 && i + 1 >= fileName.length()) return null;
-        return fileName.substring(i + 1).toLowerCase();
-    }
+	public static String getFileNameSuffix(String fileName) {
+		if (fileName == null || !fileName.contains(".")) return null;
+		int i = (fileName = fileName.trim()).lastIndexOf(".");
+		if (i <= 0 && i + 1 >= fileName.length()) return null;
+		return fileName.substring(i + 1).toLowerCase();
+	}
 
+	/**
+	 * 比较是否是同一个文件
+	 * @param file1 文件1
+	 * @param file2 文件2
+	 * @return 是否同一文件
+	 */
 	public static boolean fileEquals(File file1, File file2) {
 		if (file1 == file2) return true;
 		if (file1 == null || file2 == null) return false;
@@ -257,11 +396,15 @@ public class FileTool {
 		return eq;
 	}
 
-    public static void deleteFiles(File file) {
-        deleteFiles0(file, null);
-    }
+	/**
+	 * 删除文件/文件夹
+	 * @param file 文件/文件夹
+	 */
+	public static void deleteFiles(File file) {
+		deleteFiles0(file, null);
+	}
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
+	@SuppressWarnings("ResultOfMethodCallIgnored")
 	private static void deleteFiles0(File file, File ignore) {
 		if (file == null || !file.exists()) {
 			return;
@@ -273,18 +416,18 @@ public class FileTool {
 			file = file.getCanonicalFile();
 		} catch (IOException ignored) {
 		}
-        if (file.isDirectory()) {
-            File[] children = file.listFiles();
-            if (children != null) {
+		if (file.isDirectory()) {
+			File[] children = file.listFiles();
+			if (children != null) {
 				for (File child : children) {
 					deleteFiles0(child, ignore);
 				}
 			}
-        }
-        file.delete();
-    }
+		}
+		file.delete();
+	}
 
-    public static List<File> findFileByName(File root, String fileName) {
+	public static List<File> findFileByName(File root, String fileName) {
 		List<File> files = new ArrayList<>();
 		if (root == null || !root.exists()) {
 			return files;
@@ -304,11 +447,11 @@ public class FileTool {
 		return files;
 	}
 
-    public static void copyFiles(File sourceFile, File targetFile, boolean override) throws IOException {
-        copyFiles0(sourceFile, targetFile, override, targetFile);
-    }
+	public static void copyFiles(File sourceFile, File targetFile, boolean override) throws IOException {
+		copyFiles0(sourceFile, targetFile, override, targetFile);
+	}
 
-    private static void copyFiles0 (File sourceFile, File targetFile, boolean override, File startTargetFile) throws IOException {
+	private static void copyFiles0 (File sourceFile, File targetFile, boolean override, File startTargetFile) throws IOException {
 		sourceFile = Objects.requireNonNull(sourceFile).getCanonicalFile();
 		targetFile = Objects.requireNonNull(targetFile).getCanonicalFile();
 
@@ -317,74 +460,74 @@ public class FileTool {
 			return;
 		}
 
-        if (!sourceFile.isDirectory())  { // 是文件（不是文件夹），直接拷贝
-            FileInputStream fis = new FileInputStream(sourceFile);
-            copySingleFile(fis, targetFile, override);
-            return;
-        }
+		if (!sourceFile.isDirectory())  { // 是文件（不是文件夹），直接拷贝
+			FileInputStream fis = new FileInputStream(sourceFile);
+			copySingleFile(fis, targetFile, override);
+			return;
+		}
 
-        // 是文件夹
-        if (targetFile.getAbsolutePath().startsWith(sourceFile.getAbsolutePath())) {
-            // 该种拷贝方式会引起无限循环
-            if (sourceFile.getParentFile() == null) {
-                // 直接拷贝根目录到同一个盘，这种方式拷贝是明确要禁止的
-                throw new IllegalStateException("cannot copy root directory to the same disk");
-            }
-            // 通过拷贝时，忽略源文件里的目标文件目录，可以避免无限循环的方式
+		// 是文件夹
+		if (targetFile.getAbsolutePath().startsWith(sourceFile.getAbsolutePath())) {
+			// 该种拷贝方式会引起无限循环
+			if (sourceFile.getParentFile() == null) {
+				// 直接拷贝根目录到同一个盘，这种方式拷贝是明确要禁止的
+				throw new IllegalStateException("cannot copy root directory to the same disk");
+			}
+			// 通过拷贝时，忽略源文件里的目标文件目录，可以避免无限循环的方式
 			// noinspection ConstantConditions
 			if (targetFile.exists() && targetFile.listFiles() != null && targetFile.listFiles().length > 0) {
-                throw new IllegalStateException("source directory cannot contain target directory");
-            }
-        }
+				throw new IllegalStateException("source directory cannot contain target directory");
+			}
+		}
 
-        if (targetFile.exists()) {
-            if (targetFile.isFile() && override) { // 已存在的文件不是文件夹，如果是覆盖逻辑，则删除原来的文件
-                deleteFiles(targetFile);
+		if (targetFile.exists()) {
+			if (targetFile.isFile() && override) { // 已存在的文件不是文件夹，如果是覆盖逻辑，则删除原来的文件
+				deleteFiles(targetFile);
 				// noinspection ResultOfMethodCallIgnored
 				targetFile.mkdirs();
-            }
-        } else {
+			}
+		} else {
 			// noinspection ResultOfMethodCallIgnored
 			targetFile.mkdirs();
-        }
+		}
 
-        File[] files = sourceFile.listFiles();
-        if (files == null) return;
-        for (File child : files) {
-            if (fileEquals(child, startTargetFile)) continue;
-            String childName = child.getName();
-            File targetChild = new File(targetFile, childName);
-            copyFiles0(child, targetChild, override, startTargetFile);
-        }
-    }
+		File[] files = sourceFile.listFiles();
+		if (files == null) return;
+		for (File child : files) {
+			if (fileEquals(child, startTargetFile)) continue;
+			String childName = child.getName();
+			File targetChild = new File(targetFile, childName);
+			copyFiles0(child, targetChild, override, startTargetFile);
+		}
+	}
 
-    public static void copySingleFile(InputStream sourceInput, File targetFile, boolean override) throws IOException {
-        Objects.requireNonNull(sourceInput);
-        Objects.requireNonNull(targetFile);
+	public static void copySingleFile(InputStream sourceInput, File targetFile, boolean override) throws IOException {
+		Objects.requireNonNull(sourceInput);
+		Objects.requireNonNull(targetFile);
 
-        if (targetFile.exists()) {
-            if (override) deleteFiles(targetFile);
-            else return;
-        } else {
-            File parentFile = targetFile.getParentFile();
-            if (parentFile != null && !parentFile.exists())
-                parentFile.mkdirs();
-        }
-        targetFile.createNewFile();
-        try (InputStream fis = sourceInput;
-             FileOutputStream fos = new FileOutputStream(targetFile)) {
-            byte[] bytes = new byte[1024];
-            int len;
-            while ((len = fis.read(bytes)) != -1) {
-                fos.write(bytes, 0, len);
-            }
-        }
-    }
+		if (targetFile.exists()) {
+			if (override) deleteFiles(targetFile);
+			else return;
+		} else {
+			File parentFile = targetFile.getParentFile();
+			if (parentFile != null && !parentFile.exists())
+				parentFile.mkdirs();
+		}
+		targetFile.createNewFile();
+		try (InputStream fis = sourceInput;
+			 FileOutputStream fos = new FileOutputStream(targetFile)) {
+			byte[] bytes = new byte[1024];
+			int len;
+			while ((len = fis.read(bytes)) != -1) {
+				fos.write(bytes, 0, len);
+			}
+		}
+	}
 
-    public static void moveFiles(File sourceFile, File targetFile, boolean override) throws IOException {
-        copyFiles(sourceFile, targetFile, override);
-        deleteFiles0(sourceFile, targetFile);
-    }
+	public static void moveFiles(File sourceFile, File targetFile, boolean override) throws IOException {
+		copyFiles(sourceFile, targetFile, override);
+		deleteFiles0(sourceFile, targetFile);
+	}
 
 	public static void main(String[] args) {
 		long start = System.currentTimeMillis();
