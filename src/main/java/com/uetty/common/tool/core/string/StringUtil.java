@@ -1,9 +1,8 @@
 package com.uetty.common.tool.core.string;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import org.apache.poi.ss.formula.functions.T;
+
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -147,6 +146,72 @@ public class StringUtil {
 		}).filter(Objects::nonNull).collect(Collectors.toList());
 	}
 
+	public static <T> String join(String separator, Collection<T> collection) {
+		StringBuilder sb = new StringBuilder();
+		for (Object o : collection) {
+			if (o != null) {
+				sb.append(separator).append(o);
+			}
+		}
+		int start = 0;
+		if (sb.length() > 0) {
+			start = separator.length();
+		}
+		return sb.substring(start);
+	}
+
+	public static <T> String join(String separator, T[] array) {
+		StringBuilder sb = new StringBuilder();
+		for (T t : array) {
+			if (t != null) {
+				sb.append(separator).append(t);
+			}
+		}
+		int start = 0;
+		if (sb.length() > 0) {
+			start = separator.length();
+		}
+		return sb.substring(start);
+	}
+
+	public static String join(String separator, String... array) {
+		StringBuilder sb = new StringBuilder();
+		for (String str : array) {
+			if (str != null) {
+				sb.append(separator).append(str);
+			}
+		}
+		int start = 0;
+		if (sb.length() > 0) {
+			start = separator.length();
+		}
+		return sb.substring(start);
+	}
+
+	public static String join(String separator, int... array) {
+		StringBuilder sb = new StringBuilder();
+		for (int n : array) {
+			sb.append(separator).append(n);
+		}
+		int start = 0;
+		if (sb.length() > 0) {
+			start = separator.length();
+		}
+		return sb.substring(start);
+	}
+
+	public static String join(String separator, long... array) {
+		StringBuilder sb = new StringBuilder();
+		for (long n : array) {
+			sb.append(separator).append(n);
+		}
+		int start = 0;
+		if (sb.length() > 0) {
+			start = separator.length();
+		}
+		return sb.substring(start);
+	}
+
 	private static boolean isNumBelow256(String str) {
 		return str.matches("(1[0-9]{2})|(2[0-4][0-9])|(25[0-5])|([1-9]?[0-9])");
 	}
@@ -208,4 +273,5 @@ public class StringUtil {
 	public static boolean isNotEmpty(String str) {
 		return !isEmpty(str);
 	}
+
 }
