@@ -27,7 +27,8 @@ public class QRCodeUtil {
     private int size = DEFAULT_QR_CODE_SIZE;
     private int margin = DEFALUT_MARGIN;
     private ErrorCorrectionLevel errorCorrectionLevel = ErrorCorrectionLevel.L;
-
+    private int blankColor = DEFAULT_QR_CODE_BLANK_COLOR;
+    private int solidColor = DEFAULT_QR_CODE_SOLID_COLOR;
 
     // 二维码尺寸
     private static final int DEFAULT_QR_CODE_SIZE = 300;
@@ -35,6 +36,11 @@ public class QRCodeUtil {
     private static final int DEFAULT_LOGO_MAX_SIZE = 120;
     // 白色边框宽度
     private static final int DEFALUT_MARGIN = 8;
+
+    // 空白部分颜色
+    private static final int DEFAULT_QR_CODE_BLANK_COLOR = 0xFFFFFFFF;
+    // 非空白部分颜色
+    private static final int DEFAULT_QR_CODE_SOLID_COLOR = 0xFF000000;
 
     private BufferedImage createImage(String content, InputStream logoInputStream) throws WriterException, IOException {
         Map<EncodeHintType, Object> hints = new HashMap<>();
@@ -62,7 +68,7 @@ public class QRCodeUtil {
                 } else {
                     isBlack = bitMatrix.get(enclosingX + enclosingRectangle[0], enclosingY + enclosingRectangle[1]);
                 }
-                image.setRGB(x , y,  isBlack ? 0xFF000000 : 0xFFFFFFFF);
+                image.setRGB(x , y,  isBlack ? blankColor : solidColor);
             }
         }
 
