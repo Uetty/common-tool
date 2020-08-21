@@ -25,7 +25,7 @@ public class QRCodeUtil {
 
     private int logoMaxSize = DEFAULT_LOGO_MAX_SIZE;
     private int size = DEFAULT_QR_CODE_SIZE;
-    private int margin = DEFALUT_MARGIN;
+    private int margin = DEFAULT_MARGIN;
     private ErrorCorrectionLevel errorCorrectionLevel = ErrorCorrectionLevel.L;
     private int blankColor = DEFAULT_QR_CODE_BLANK_COLOR;
     private int solidColor = DEFAULT_QR_CODE_SOLID_COLOR;
@@ -35,7 +35,7 @@ public class QRCodeUtil {
     // LOGO最大尺寸
     private static final int DEFAULT_LOGO_MAX_SIZE = 120;
     // 白色边框宽度
-    private static final int DEFALUT_MARGIN = 8;
+    private static final int DEFAULT_MARGIN = 8;
 
     // 空白部分颜色
     private static final int DEFAULT_QR_CODE_BLANK_COLOR = 0xFFFFFFFF;
@@ -52,6 +52,7 @@ public class QRCodeUtil {
                 BarcodeFormat.QR_CODE, size, size, hints);
 
         int[] enclosingRectangle = bitMatrix.getEnclosingRectangle();
+
         int qrcodeRealSize = enclosingRectangle[2] * size / (size - 2 * margin);
         int realMargin = (qrcodeRealSize - enclosingRectangle[2]) / 2;
         BufferedImage image = new BufferedImage(qrcodeRealSize, qrcodeRealSize,
