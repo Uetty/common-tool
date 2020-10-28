@@ -83,6 +83,30 @@ public class FileTool {
 		}
 	}
 
+	public static void writeToFile(File file, InputStream inputStream, boolean append) throws IOException {
+		if (!file.exists()) {
+			file.getParentFile().mkdirs();
+			file.createNewFile();
+		}
+		try (FileOutputStream fis = new FileOutputStream(file, append)) {
+			byte[] bytes = new byte[1024];
+			int len;
+			while ((len = inputStream.read(bytes, 0, bytes.length)) != -1) {
+				fis.write(bytes, 0, len);
+			}
+		}
+	}
+
+	public static void writeToFile(File file, byte[] bytes, boolean append) throws IOException {
+		if (!file.exists()) {
+			file.getParentFile().mkdirs();
+			file.createNewFile();
+		}
+		try (FileOutputStream fis = new FileOutputStream(file, append)) {
+			fis.write(bytes);
+		}
+	}
+
 	/**
 	 * 文件路径是否绝对路径
 	 * @param path 路径
