@@ -12,6 +12,10 @@ import java.util.function.Consumer;
 @SuppressWarnings({"ResultOfMethodCallIgnored", "WeakerAccess", "unused"})
 public class FileTool {
 
+	public static String getDefaultTmpDir() {
+		return System.getProperty("java.io.tmpdir");
+	}
+
 	/**
 	 * 产生临时文件路径（随机文件名）
 	 * @param extName 扩展名
