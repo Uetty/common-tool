@@ -6,10 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.*;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.*;
 import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -37,7 +34,7 @@ public class HttpClientUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(HttpClientUtil.class);
 
-    private static final String DEF_CHATSET = "UTF-8";
+    private static final String DEFAULT_CHARSET = "UTF-8";
     private static final int DEF_CONN_TIMEOUT = 30_000;
     private static final int DEF_READ_TIMEOUT = 30_000;
 
@@ -84,8 +81,8 @@ public class HttpClientUtil {
     private static void addParam(StringBuilder sb, String key, Object value) {
         if (value == null) value = "";
         try {
-            sb.append(URLEncoder.encode(key, DEF_CHATSET)).append("=");
-            sb.append(URLEncoder.encode(value.toString(), DEF_CHATSET)).append("&");
+            sb.append(URLEncoder.encode(key, DEFAULT_CHARSET)).append("=");
+            sb.append(URLEncoder.encode(value.toString(), DEFAULT_CHARSET)).append("&");
         } catch (UnsupportedEncodingException e) {
             LOG.warn(e.getMessage(), e);
         }
@@ -109,7 +106,7 @@ public class HttpClientUtil {
         return CONTENT_TYPE_JSON.equalsIgnoreCase(contentType);
     }
 
-    private static HttpEntity createEntity(HttpPost httpPost, Map<String, Object> params, String contentType) throws UnsupportedEncodingException, JsonProcessingException {
+    private static HttpEntity createEntity(Map<String, Object> params, String contentType) throws UnsupportedEncodingException, JsonProcessingException {
         boolean contentTypeJson = isContentTypeJson(contentType);
         if (contentTypeJson) {
             return new JsonStringEntity(params);
@@ -124,13 +121,13 @@ public class HttpClientUtil {
         }
     }
 
-    private static void setParams(HttpPost httpPost, Map<String, Object> params) {
+    private static void setParams(HttpEntityEnclosingRequestBase httpRequest, Map<String, Object> params) {
         try {
-            Header contentTypeHeader = httpPost.getFirstHeader(HTTP.CONTENT_TYPE);
+            Header contentTypeHeader = httpRequest.getFirstHeader(HTTP.CONTENT_TYPE);
 
-            HttpEntity entity = createEntity(httpPost, params, contentTypeHeader != null ? contentTypeHeader.getValue() : DEFAULT_CONTENT_TYPE);
+            HttpEntity entity = createEntity(params, contentTypeHeader != null ? contentTypeHeader.getValue() : DEFAULT_CONTENT_TYPE);
 
-            httpPost.setEntity(entity);
+            httpRequest.setEntity(entity);
 
         } catch (UnsupportedEncodingException | JsonProcessingException e) {
             LOG.error(e.getMessage(), e);
@@ -212,12 +209,41 @@ public class HttpClientUtil {
     private static HttpGet createGet(String uri, Map<String, Object> headers, Map<String, Object> params) {
         String paramStr = buildParams(params);
         if (paramStr.length() > 0) {
-            uri = uri + "?" + paramStr;
+            if (uri.indexOf('?') == -1) {
+                uri += '?';
+            } else {
+                uri += '&';
+            }
+            uri += paramStr;
         }
         HttpGet httpGet = new HttpGet(uri);
         setHeaders(httpGet, headers);
         httpGet.setConfig(getRequestConfig());
         return httpGet;
+    }
+
+    private static HttpPut createPut(String uri, Map<String, Object> headers, Map<String, Object> params) {
+        HttpPut httpPut = new HttpPut(uri);
+        setHeaders(httpPut, headers);
+        setParams(httpPut, params);
+        httpPut.setConfig(getRequestConfig());
+        return httpPut;
+    }
+
+    private static HttpDelete createDelete(String uri, Map<String, Object> headers, Map<String, Object> params) {
+        String paramStr = buildParams(params);
+        if (paramStr.length() > 0) {
+            if (uri.indexOf('?') == -1) {
+                uri += '?';
+            } else {
+                uri += '&';
+            }
+            uri += paramStr;
+        }
+        HttpDelete httpDelete = new HttpDelete(uri);
+        setHeaders(httpDelete, headers);
+        httpDelete.setConfig(getRequestConfig());
+        return httpDelete;
     }
 
     private static HttpClientBuilder getHttpClientBuilder() {
@@ -250,7 +276,7 @@ public class HttpClientUtil {
             int code = response.getStatusLine().getStatusCode();
             Map<String, List<String>> headers = getResponseHeaders(response);
             HttpEntity entity = response.getEntity();
-            String body = EntityUtils.toString(entity, DEF_CHATSET);
+            String body = EntityUtils.toString(entity, DEFAULT_CHARSET);
 
             hrr.setCode(code);
             hrr.setHeaders(headers);
@@ -270,6 +296,16 @@ public class HttpClientUtil {
     public static HttpResponseVo doGet(String uri, Map<String, Object> headers, Map<String, Object> params) {
         HttpGet httpGet = createGet(uri, headers, params);
         return doRequest(httpGet);
+    }
+
+    public static HttpResponseVo doPut(String uri, Map<String, Object> headers, Map<String, Object> params) {
+        HttpPut httpPut = createPut(uri, headers, params);
+        return doRequest(httpPut);
+    }
+
+    public static HttpResponseVo doDelete(String uri, Map<String, Object> headers, Map<String, Object> params) {
+        HttpDelete httpDelete = createDelete(uri, headers, params);
+        return doRequest(httpDelete);
     }
 
     public static HttpResponseVo doGetLoad(String uri, Map<String, Object> headers, Map<String, Object> params) {
