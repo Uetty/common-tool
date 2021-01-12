@@ -1,6 +1,6 @@
 package com.uetty.common.tool.core.net.dns;
 
-import com.uetty.common.tool.core.FileTool;
+import com.uetty.common.tool.core.FileUtil;
 import org.xbill.DNS.*;
 
 import java.io.IOException;
@@ -56,7 +56,7 @@ public class DnsTest {
 
     private static List<String> readLines(String fileName) throws IOException {
         try (InputStream resourceAsStream = DnsTest.class.getClassLoader().getResourceAsStream(fileName)) {
-            List<String> lines = FileTool.readLines(resourceAsStream);
+            List<String> lines = FileUtil.readLines(resourceAsStream);
             for (int i = 0; i < lines.size(); i++) {
                 String s = lines.get(i);
                 if (s != null) {

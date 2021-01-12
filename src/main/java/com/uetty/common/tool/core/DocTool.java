@@ -62,12 +62,12 @@ public class DocTool {
 			// freemarker处理模板文件，生成临时文件
 			for (String key : ftlFileMap.keySet()) {
 				File ftlFile = ftlFileMap.get(key);
-				String entryFilePath = FileTool.randomFilePathByExtName(null, tmpFileDir);
+				String entryFilePath = FileUtil.randomFilePathByExtName(null, tmpFileDir);
 				File entryFile = FreemarkerEngine.process(dataMap, ftlFile.getAbsolutePath(), entryFilePath);
 				entryFileMap.put(key, entryFile);
 			}
 
-			outFile = new File(FileTool.randomFilePathByExtName("docx", tmpFileDir));
+			outFile = new File(FileUtil.randomFilePathByExtName("docx", tmpFileDir));
 
 			zipFile = new ZipFile(docxFile);
 			zipout = new ZipOutputStream(new FileOutputStream(outFile));
@@ -88,7 +88,7 @@ public class DocTool {
 				if (is == null) {
 					is = zipFile.getInputStream(next);
 				}
-				FileTool.writeFromInputStream(zipout, is);
+				FileUtil.writeFromInputStream(zipout, is);
 			}
 		} finally {
 			for (File entryFile : entryFileMap.values()) {

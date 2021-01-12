@@ -10,7 +10,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 @SuppressWarnings({"ResultOfMethodCallIgnored", "WeakerAccess", "unused"})
-public class FileTool {
+public class FileUtil {
 
 	public static String getDefaultTmpDir() {
 		return System.getProperty("java.io.tmpdir");
@@ -169,6 +169,28 @@ public class FileTool {
 	}
 
 	/**
+	 * 文件读取为bytes
+	 * @param file 文件
+	 * @throws IOException io exception
+	 */
+	public static byte[] readToByte(File file) throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		FileUtil.readByteByByte(file, 1024, baos::write);
+		return baos.toByteArray();
+	}
+
+	/**
+	 * 文件读取为bytes
+	 * @param inputStream 输入流
+	 * @throws IOException io exception
+	 */
+	public static byte[] readToByte(InputStream inputStream) throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		FileUtil.readByteByByte(inputStream, 1024, baos::write);
+		return baos.toByteArray();
+	}
+
+	/**
 	 * 文件内容读取为多行字符串
 	 * @param file 文件
 	 * @throws IOException io exception
@@ -225,7 +247,7 @@ public class FileTool {
 	 * @param consumer 行字符串处理消费者
 	 * @throws IOException io exception
 	 */
-	public static void readLineByLine(File file, Consumer<String> consumer) throws IOException {
+	public static void readLineByLine(File file, IOConsumer<String> consumer) throws IOException {
 		readLineByLine(file, StandardCharsets.UTF_8.name(), consumer);
 	}
 
@@ -236,7 +258,7 @@ public class FileTool {
 	 * @param consumer 行字符串处理消费者
 	 * @throws IOException io exception
 	 */
-	public static void readLineByLine(File file, String charset, Consumer<String> consumer) throws IOException {
+	public static void readLineByLine(File file, String charset, IOConsumer<String> consumer) throws IOException {
 		try (FileInputStream inputStream = new FileInputStream(file)) {
 			readLineByLine(inputStream, charset, consumer);
 		}
@@ -248,7 +270,7 @@ public class FileTool {
 	 * @param consumer 行字符串处理消费者
 	 * @throws IOException io exception
 	 */
-	public static void readLineByLine(InputStream inputStream, Consumer<String> consumer) throws IOException {
+	public static void readLineByLine(InputStream inputStream, IOConsumer<String> consumer) throws IOException {
 		readLineByLine(inputStream, StandardCharsets.UTF_8.name(), consumer);
 	}
 
@@ -259,7 +281,7 @@ public class FileTool {
 	 * @param consumer 行字符串处理消费者
 	 * @throws IOException io exception   
 	 */
-	public static void readLineByLine(InputStream inputStream, String charset, Consumer<String> consumer) throws IOException {
+	public static void readLineByLine(InputStream inputStream, String charset, IOConsumer<String> consumer) throws IOException {
 		try (InputStreamReader reader = new InputStreamReader(inputStream, charset);
 			 BufferedReader br = new BufferedReader(reader)) {
 			String line;
@@ -272,57 +294,60 @@ public class FileTool {
 	/**
 	 * 一组字符一组字符处理文件（考虑到文件可能太大，会对内存造成过大压力，通过consumer一组字符一组字符处理）
 	 * @param file 文件
-	 * @param maxLength 每组字符最大个数
+	 * @param maxUnitSize 每组字符最大个数
 	 * @param consumer 处理消费者
 	 * @throws IOException io exception   
 	 */
-	public static void readCharByChar(File file, int maxLength, Consumer<char[]> consumer) throws IOException {
-		readCharByChar(file, StandardCharsets.UTF_8.name(), maxLength, consumer);
+	public static void readCharByChar(File file, int maxUnitSize, IOConsumer<char[]> consumer) throws IOException {
+		readCharByChar(file, StandardCharsets.UTF_8.name(), maxUnitSize, consumer);
 	}
 
 	/**
 	 * 一组字符一组字符处理文件（考虑到文件可能太大，会对内存造成过大压力，通过consumer一组字符一组字符处理）
 	 * @param file 文件
 	 * @param charset 字符编码格式
-	 * @param maxLength 每组字符最大个数
+	 * @param maxUnitSize 每组字符最大个数
 	 * @param consumer 处理消费者
 	 * @throws IOException io exception   
 	 */
-	public static void readCharByChar(File file, String charset, int maxLength, Consumer<char[]> consumer) throws IOException {
+	public static void readCharByChar(File file, String charset, int maxUnitSize, IOConsumer<char[]> consumer) throws IOException {
 		try (FileInputStream inputStream = new FileInputStream(file)) {
-			readCharByChar(inputStream, charset, maxLength, consumer);
+			readCharByChar(inputStream, charset, maxUnitSize, consumer);
 		}
 	}
 
 	/**
 	 * 一组字符一组字符处理输入流（考虑到输入流可能太大，会对内存造成过大压力，通过consumer一组字符一组字符处理）
 	 * @param inputStream 输入流
-	 * @param maxLength 每组字符最大个数
+	 * @param maxUnitSize 每组字符最大个数
 	 * @param consumer 处理消费者
 	 * @throws IOException io exception   
 	 */
-	public static void readCharByChar(InputStream inputStream, int maxLength, Consumer<char[]> consumer) throws IOException {
-		readCharByChar(inputStream, StandardCharsets.UTF_8.name(), maxLength, consumer);
+	public static void readCharByChar(InputStream inputStream, int maxUnitSize, IOConsumer<char[]> consumer) throws IOException {
+		readCharByChar(inputStream, StandardCharsets.UTF_8.name(), maxUnitSize, consumer);
 	}
 
 	/**
 	 * 一组字符一组字符处理输入流（考虑到输入流可能太大，会对内存造成过大压力，通过consumer一组字符一组字符处理）
 	 * @param inputStream 输入流
 	 * @param charset 字符编码格式
-	 * @param maxLength 每组字符最大个数
+	 * @param maxUnitSize 每组字符最大个数
 	 * @param consumer 处理消费者
 	 * @throws IOException io exception   
 	 */
-	public static void readCharByChar(InputStream inputStream, String charset, int maxLength, Consumer<char[]> consumer) throws IOException {
-		if (maxLength <= 0) {
-			maxLength = 1024;
+	public static void readCharByChar(InputStream inputStream, String charset, int maxUnitSize, IOConsumer<char[]> consumer) throws IOException {
+		if (maxUnitSize <= 0) {
+			maxUnitSize = 1024;
 		}
 		try (InputStreamReader reader = new InputStreamReader(inputStream, charset)) {
-			char[] chars = new char[maxLength];
+			char[] chars = new char[maxUnitSize];
 			int c;
 			while ((c = reader.read(chars, 0, chars.length)) != -1) {
-				char[] cb = new char[c];
-				System.arraycopy(chars, 0, cb, 0, c);
+				char[] cb = chars;
+				if (c != maxUnitSize) {
+					cb = new char[c];
+					System.arraycopy(chars, 0, cb, 0, c);
+				}
 				consumer.accept(cb);
 			}
 		}
@@ -331,32 +356,35 @@ public class FileTool {
 	/**
 	 * 一组字节一组字节处理文件（考虑到文件可能太大，会对内存造成过大压力，通过consumer一组字节一组字节处理）
 	 * @param file 文件
-	 * @param maxLength 每组字节最大个数
+	 * @param maxUnitSize 每组字节最大个数
 	 * @param consumer 处理消费者
 	 * @throws IOException io exception   
 	 */
-	public static void readByteByByte(File file, int maxLength, Consumer<byte[]> consumer) throws IOException {
+	public static void readByteByByte(File file, int maxUnitSize, IOConsumer<byte[]> consumer) throws IOException {
 		try (FileInputStream inputStream = new FileInputStream(file)) {
-			readByteByByte(inputStream, maxLength, consumer);
+			readByteByByte(inputStream, maxUnitSize, consumer);
 		}
 	}
 
 	/**
 	 * 一组字节一组字节处理输入流（考虑到输入流可能太大，会对内存造成过大压力，通过consumer一组字节一组字节处理）
 	 * @param inputStream 输入流
-	 * @param maxLength 每组字节最大个数
+	 * @param maxUnitSize 每组字节最大个数
 	 * @param consumer 处理消费者
 	 * @throws IOException io exception   
 	 */
-	public static void readByteByByte(InputStream inputStream, int maxLength, Consumer<byte[]> consumer) throws IOException {
-		if (maxLength <= 0) {
-			maxLength = 1024;
+	public static void readByteByByte(InputStream inputStream, int maxUnitSize, IOConsumer<byte[]> consumer) throws IOException {
+		if (maxUnitSize <= 0) {
+			maxUnitSize = 1024;
 		}
-		byte[] collect = new byte[maxLength];
+		byte[] collect = new byte[maxUnitSize];
 		int c;
 		while ((c = inputStream.read(collect, 0, collect.length)) != -1) {
-			byte[] bytes = new byte[c];
-			System.arraycopy(collect, 0, bytes, 0, c);
+			byte[] bytes = collect;
+			if (c != maxUnitSize) {
+				bytes = new byte[c];
+				System.arraycopy(collect, 0, bytes, 0, c);
+			}
 			consumer.accept(bytes);
 		}
 	}
@@ -555,6 +583,15 @@ public class FileTool {
 	public static void moveFiles(File sourceFile, File targetFile, boolean override) throws IOException {
 		copyFiles(sourceFile, targetFile, override);
 		deleteFiles0(sourceFile, targetFile);
+	}
+
+	public interface IOConsumer<T> {
+		void accept(T t) throws IOException;
+
+		default IOConsumer<T> andThen(Consumer<? super T> after) throws IOException {
+			Objects.requireNonNull(after);
+			return (T t) -> { accept(t); after.accept(t); };
+		}
 	}
 
 	public static void main(String[] args) {

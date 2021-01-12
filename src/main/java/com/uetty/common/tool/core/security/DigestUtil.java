@@ -1,6 +1,6 @@
 package com.uetty.common.tool.core.security;
 
-import com.uetty.common.tool.core.FileTool;
+import com.uetty.common.tool.core.FileUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,7 +65,7 @@ public class DigestUtil {
         // 获取算法对象
         MessageDigest instance = MessageDigest
                 .getInstance(algorithm);
-        FileTool.readByteByByte(file, 1024, instance::update);
+        FileUtil.readByteByByte(file, 1024, instance::update);
         byte[] digest = instance.digest();
         return toHexString(digest);
     }
