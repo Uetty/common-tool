@@ -18,7 +18,7 @@ public class JwtUtil {
     private static final String KEY_USERNAME = "username";
     private static final String ISSUER = "my-team-name";
 
-    private static String createToken0(String secret, Long expire, String username, Map<String, String> data) {
+    private static String createToken0(String secret, Long expire, Date notBefore, String username, Map<String, String> data) {
         if (data == null) {
             data = new HashMap<>();
         }
@@ -35,20 +35,30 @@ public class JwtUtil {
             Date expireDate = new Date(date.getTime() + expire);
             builder.withExpiresAt(expireDate);
         }
+        if (notBefore != null) {
+            builder.withNotBefore(notBefore);
+        }
         return builder.sign(Algorithm.HMAC256(secret));
     }
 
     public static String createToken(String secret, long expire, Map<String, String> data) {
-        return createToken0(secret, expire, null, data);
+        return createToken0(secret, expire, null,null, data);
     }
 
-    @SuppressWarnings("unused")
+    public static String createToken(String secret, String username, Map<String, String> data) {
+        return createToken0(secret, null, null, username, data);
+    }
+
     public static String createToken(String secret, long expire, String username, Map<String, String> data) {
-        return createToken0(secret, expire, username, data);
+        return createToken0(secret, expire, null, username, data);
+    }
+
+    public static String createToken(String secret, long expire, Date notBefore, String username, Map<String, String> data) {
+        return createToken0(secret, expire, notBefore, username, data);
     }
 
     public static String createToken(String secret, Map<String, String> data) {
-        return createToken0(secret, null, null, data);
+        return createToken0(secret, null, null,null, data);
     }
 
     public static void verify(String jwtToken, String secret) {
