@@ -16,23 +16,39 @@ import java.util.Map;
 public class JwtUtil {
 
     private static final String KEY_USERNAME = "username";
+    private static final String ISSUER = "my-team-name";
 
-    public static String createToken(Map<String, String> data, String secret, long expire) {
-        JWTCreator.Builder builder = JWT.create();
-        if (data != null) {
-            data.forEach(builder::withClaim);
+    private static String createToken0(String secret, Long expire, String username, Map<String, String> data) {
+        if (data == null) {
+            data = new HashMap<>();
         }
+        if (username != null) {
+            data.put(KEY_USERNAME, username);
+        }
+
+        JWTCreator.Builder builder = JWT.create();
+        data.forEach(builder::withClaim);
+        builder.withIssuer(ISSUER);
         Date date = new Date();
         builder.withIssuedAt(date);
-        Date expireDate = new Date(date.getTime() + expire);
-        builder.withExpiresAt(expireDate);
+        if (expire != null) {
+            Date expireDate = new Date(date.getTime() + expire);
+            builder.withExpiresAt(expireDate);
+        }
         return builder.sign(Algorithm.HMAC256(secret));
     }
 
+    public static String createToken(String secret, long expire, Map<String, String> data) {
+        return createToken0(secret, expire, null, data);
+    }
+
     @SuppressWarnings("unused")
-    public static String createToken(String username, Map<String, String> data, String secret, long expire) {
-        data.put(KEY_USERNAME, username);
-        return createToken(data, secret, expire);
+    public static String createToken(String secret, long expire, String username, Map<String, String> data) {
+        return createToken0(secret, expire, username, data);
+    }
+
+    public static String createToken(String secret, Map<String, String> data) {
+        return createToken0(secret, null, null, data);
     }
 
     public static void verify(String jwtToken, String secret) {
