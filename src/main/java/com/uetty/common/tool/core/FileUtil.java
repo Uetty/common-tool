@@ -112,7 +112,9 @@ public class FileUtil {
 	 * @param path 路径
 	 */
 	public static boolean isAbsolutePath (String path) {
-		if (path.startsWith("/")) return true;
+		if (path.startsWith("/")) {
+			return true;
+		}
 		if (isWinOS()) {// windows
 			return path.contains(":") || path.startsWith("\\");
 		} else {// not windows, just unix compatible
@@ -423,16 +425,24 @@ public class FileUtil {
 	}
 
 	public static String getFileNamePrefix(String fileName) {
-		if (fileName == null || !fileName.contains(".")) return fileName;
+		if (fileName == null || !fileName.contains(".")) {
+			return fileName;
+		}
 		int i = (fileName = fileName.trim()).lastIndexOf(".");
-		if (i <= 0) return fileName;
+		if (i <= 0) {
+			return fileName;
+		}
 		return fileName.substring(0, i);
 	}
 
 	public static String getFileNameSuffix(String fileName) {
-		if (fileName == null || !fileName.contains(".")) return null;
+		if (fileName == null || !fileName.contains(".")) {
+			return null;
+		}
 		int i = (fileName = fileName.trim()).lastIndexOf(".");
-		if (i <= 0 && i + 1 >= fileName.length()) return null;
+		if (i <= 0 && i + 1 >= fileName.length()) {
+			return null;
+		}
 		return fileName.substring(i + 1).toLowerCase();
 	}
 
@@ -443,8 +453,12 @@ public class FileUtil {
 	 * @return 是否同一文件
 	 */
 	public static boolean fileEquals(File file1, File file2) {
-		if (file1 == file2) return true;
-		if (file1 == null || file2 == null) return false;
+		if (file1 == file2) {
+			return true;
+		}
+		if (file1 == null || file2 == null) {
+			return false;
+		}
 		boolean eq = false;
 		try {
 			eq = file1.getCanonicalFile().equals(file2.getCanonicalFile());
@@ -548,9 +562,13 @@ public class FileUtil {
 		}
 
 		File[] files = sourceFile.listFiles();
-		if (files == null) return;
+		if (files == null) {
+			return;
+		}
 		for (File child : files) {
-			if (fileEquals(child, startTargetFile)) continue;
+			if (fileEquals(child, startTargetFile)) {
+				continue;
+			}
 			String childName = child.getName();
 			File targetChild = new File(targetFile, childName);
 			copyFiles0(child, targetChild, override, startTargetFile);
@@ -562,12 +580,16 @@ public class FileUtil {
 		Objects.requireNonNull(targetFile);
 
 		if (targetFile.exists()) {
-			if (override) deleteFiles(targetFile);
-			else return;
+			if (override) {
+				deleteFiles(targetFile);
+			} else {
+				return;
+			}
 		} else {
 			File parentFile = targetFile.getParentFile();
-			if (parentFile != null && !parentFile.exists())
+			if (parentFile != null && !parentFile.exists()) {
 				parentFile.mkdirs();
+			}
 		}
 		targetFile.createNewFile();
 		try (InputStream fis = sourceInput;
@@ -585,6 +607,28 @@ public class FileUtil {
 		deleteFiles0(sourceFile, targetFile);
 	}
 
+	public static String readMagicNumber(File file, int byteCount) throws IOException {
+		byte[] bytes = new byte[byteCount];
+		StringBuilder sb = new StringBuilder();
+		try (FileInputStream inputStream = new FileInputStream(file)) {
+			inputStream.read(bytes, 0, bytes.length);
+			return toHexString(bytes);
+		}
+	}
+
+	private static String toHexString(byte[] digest) {
+		StringBuilder sb = new StringBuilder();
+		for (byte b : digest) {
+			int j = b & 0xff;// 获取字节的低八位有效值
+			String hexString = Integer.toHexString(j);// 十进制转16进制
+			if (hexString.length() < 2) {// 每个字节两位字符
+				hexString = "0" + hexString;
+			}
+			sb.append(hexString);
+		}
+		return sb.toString();
+	}
+
 	public interface IOConsumer<T> {
 		void accept(T t) throws IOException;
 
@@ -594,12 +638,11 @@ public class FileUtil {
 		}
 	}
 
-	public static void main(String[] args) {
-		long start = System.currentTimeMillis();
-		File file = new File("E:\\IdeaProjects");
-		List<File> findFiles = findFileByName(file, ".gitignore");
-		System.out.println(findFiles);
-
-		System.out.println((System.currentTimeMillis() - start));
+	public static void main(String[] args) throws IOException {
+		System.out.println("正常JPG文件头魔数：" + readMagicNumber(new File("/Users/vince/temp/4849bdc1-2844-48db-855d-9cd5a6cc31b4.png"), 8).toUpperCase());
+		System.out.println();
+		System.out.println("正常Webp文件头魔数：" + readMagicNumber(new File("/Users/vince/temp/ar2me-0i9j5.webp"), 8).toUpperCase());
+		System.out.println();
+		System.out.println("上传的文件文件头：" + readMagicNumber(new File("/Users/vince/temp/c2fbe7526b32455792905e599f42dae0.jpeg"), 8).toUpperCase());
 	}
 }
