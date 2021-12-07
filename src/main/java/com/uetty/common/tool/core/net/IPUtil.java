@@ -1,15 +1,26 @@
 package com.uetty.common.tool.core.net;
 import javax.servlet.http.HttpServletRequest;
+import java.net.InetAddress;
 
 
 @SuppressWarnings("unused")
 public class IPUtil {
 
-//	private static final Logger log = LoggerFactory.getLogger(IPUtil.class);
-	public static String getRequestIp(HttpServletRequest request) {
-		String  ip = request.getHeader("HTTP_X_FORWARDED_FOR");
-        if(ip == null ||ip.equals("")||"unknown".equalsIgnoreCase(ip)){
-         ip = request.getHeader("X-Forwarded-For");
+    public static String getCurrentIp() {
+        try {
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (Exception e) {
+            return "127.0.0.1";
+        }
+    }
+
+    public static String getRequestIp(HttpServletRequest request) {
+        if (request == null) {
+            return null;
+        }
+        String  ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+        if(ip == null || "".equals(ip)||"unknown".equalsIgnoreCase(ip)){
+            ip = request.getHeader("X-Forwarded-For");
         }
         if (ip != null && !"".equals(ip) && !"unknown".equalsIgnoreCase(ip)) {
             // 多次反向代理后会有多个IP值，第一个为真实IP。
@@ -19,13 +30,13 @@ public class IPUtil {
             } else {
                 return ip;
             }
-        } 
+        }
         ip = request.getHeader("X-Real-IP");
         if (ip != null && !"".equals(ip) && !"unknown".equalsIgnoreCase(ip)) {
-        	return ip;
+            return ip;
         }
         return request.getRemoteAddr();
-	}
+    }
 	
 //	public static String getCityForIp(String ip) {
 //		String city = null;
