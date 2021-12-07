@@ -26,6 +26,10 @@ public class JacksonUtil {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
+    public static JacksonUtil getDefault() {
+        return jackson;
+    }
+
     /**
      * Float反序列化成BigDECIMAL
      * @return 链式返回
