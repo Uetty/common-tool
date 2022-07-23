@@ -1,15 +1,29 @@
 package com.uetty.common.tool.core.excel;
 
+import org.apache.poi.POIXMLDocument;
+import org.apache.poi.POIXMLDocumentPart;
+import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
+import org.apache.poi.hssf.usermodel.HSSFPicture;
+import org.apache.poi.hssf.usermodel.HSSFPictureData;
 import org.apache.poi.hssf.usermodel.HSSFRichTextString;
+import org.apache.poi.hssf.usermodel.HSSFShape;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
+import org.apache.poi.xssf.usermodel.XSSFDrawing;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
+import org.apache.poi.xssf.usermodel.XSSFPicture;
+import org.apache.poi.xssf.usermodel.XSSFPictureData;
+import org.apache.poi.xssf.usermodel.XSSFShape;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.openxmlformats.schemas.drawingml.x2006.spreadsheetDrawing.CTMarker;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -32,47 +46,76 @@ public class ExcelOpe {
     /** workbook对象. */
     private Workbook wb;
 
+    /**
+     * 是不是Xss
+     */
+    private final boolean isXSSFWorkbook;
+
     private DateFormat readDateFormat = null;
+
+    private boolean readNumericAsString = false;
 
     /**
      * 仅xls格式成功过
      * @param is 输入流
      */
     public ExcelOpe(InputStream is) {
+        if (!(is.markSupported())) {
+            is = new BufferedInputStream(is, 8);
+        }
+
         POIFSFileSystem fs;
         try {
-            fs = new POIFSFileSystem(is);
+            // 高版本POI
+//            FileMagic fileMagic = FileMagic.valueOf(is);
+//            if (fileMagic == FileMagic.OLE2) {
+//                wb = new HSSFWorkbook(is);
+//                isXSSFWorkbook = false;
+//            } else if (fileMagic == FileMagic.OOXML) {
+//                wb = new XSSFWorkbook(is);
+//                isXSSFWorkbook = true;
+//            }
+            // 低版本POI
+            if (POIFSFileSystem.hasPOIFSHeader(is)) {
+                wb = new HSSFWorkbook(is);
+                isXSSFWorkbook = false;
+            } else if (POIXMLDocument.hasOOXMLHeader(is)) {
+                wb = new XSSFWorkbook(is);
+                isXSSFWorkbook = true;
+            } else {
+                throw new RuntimeException("invalid excel file header");
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        // 先尝试xls，后尝试xlsx
-        try {
-            wb = new HSSFWorkbook(fs);
-        } catch (IOException e) {
-            try {
-                wb = new XSSFWorkbook(is);
-            } catch (IOException e1) {
-                throw new RuntimeException(e);
-            }
-        }
-
     }
 
     public ExcelOpe(String filePath) {
-        // excle的类型
-        String readType = filePath.substring(filePath.lastIndexOf("."));
+        POIFSFileSystem fs;
         try {
-            FileInputStream fileInputStream = new FileInputStream(filePath);
-            if (".xls".equalsIgnoreCase(readType)) {
-                POIFSFileSystem fs = new POIFSFileSystem(fileInputStream);
-                wb = new HSSFWorkbook(fs);
+
+            InputStream is = new BufferedInputStream(new FileInputStream(filePath), 8);
+            // 高版本POI
+//            FileMagic fileMagic = FileMagic.valueOf(is);
+//            if (fileMagic == FileMagic.OLE2) {
+//                wb = new HSSFWorkbook(is);
+//                isXSSFWorkbook = false;
+//            } else if (fileMagic == FileMagic.OOXML) {
+//                wb = new XSSFWorkbook(is);
+//                isXSSFWorkbook = true;
+//            }
+            // 低版本POI
+            if (POIFSFileSystem.hasPOIFSHeader(is)) {
+                wb = new HSSFWorkbook(is);
+                isXSSFWorkbook = false;
+            } else if (POIXMLDocument.hasOOXMLHeader(is)) {
+                wb = new XSSFWorkbook(is);
+                isXSSFWorkbook = true;
             } else {
-                wb = new XSSFWorkbook(fileInputStream);
+                throw new RuntimeException("invalid excel file header");
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage() + filePath, e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -109,6 +152,14 @@ public class ExcelOpe {
 
         /** 列. */
         private final int col;
+    }
+
+    public boolean isReadNumericAsString() {
+        return readNumericAsString;
+    }
+
+    public void setReadNumericAsString(boolean readNumericAsString) {
+        this.readNumericAsString = readNumericAsString;
     }
 
     /**
@@ -415,45 +466,55 @@ public class ExcelOpe {
     public Object getCellValue(Cell cell) {
         Object value = null;
         if (cell != null) {
+            // 高版本使用
+            // CellType celltype = cell.getCellTypeEnum();
             int cellType = cell.getCellType();
             switch (cellType) {
+                // 高版本使用
+                // case NUMERIC:
                 case Cell.CELL_TYPE_NUMERIC:
-                    double numTxt = cell.getNumericCellValue();
                     if (HSSFDateUtil.isCellDateFormatted(cell)) {
-                        Date date;
-                        date = HSSFDateUtil.getJavaDate(cell.getNumericCellValue());
-                        DateFormat sdf = fullTimeFmt;
-                        if (this.readDateFormat != null) {
-                        	sdf = this.readDateFormat;
+                        value = cell.getDateCellValue();
+                        if (value != null && getReadDateFormat() != null) {
+                            value = getReadDateFormat().format(value);
                         }
-                        value = sdf.format(date);
-
                     } else {
-                        // 只能这样处理下整形了
-                    	if (numTxt == ((long)numTxt)) {
-                    		value = String.valueOf((long)numTxt);
-                    	} else {
-                    		value = String.valueOf(numTxt);
-                    	}
-                    	
+                        double numericCellValue = cell.getNumericCellValue();
+                        if (this.isReadNumericAsString()) {
+                            if ((long) numericCellValue == numericCellValue) {
+                                value = String.valueOf((long) numericCellValue);
+                            } else {
+                                value = String.valueOf(numericCellValue);
+                            }
+                        } else {
+                            value = cell.getNumericCellValue();
+                        }
                     }// 全部当做文本
                     break;
+                // 高版本使用
+                // case BOOLEAN:
                 case Cell.CELL_TYPE_BOOLEAN:
                     value = cell.getBooleanCellValue();
                     break;
+                // 高版本使用
+                // case BLANK:
                 case Cell.CELL_TYPE_BLANK:
                     value = null;
                     break;
+                // 高版本使用
+                // case FORMULA:
                 case Cell.CELL_TYPE_FORMULA:
                     FormulaEvaluator eval;
-                    if (wb instanceof HSSFWorkbook) {
-                        eval = new HSSFFormulaEvaluator((HSSFWorkbook) wb);
-                    } else {
+                    if (this.isXSSFWorkbook()) {
                         eval = new XSSFFormulaEvaluator((XSSFWorkbook) wb);
+                    } else {
+                        eval = new HSSFFormulaEvaluator((HSSFWorkbook) wb);
                     }
                     eval.evaluateInCell(cell);
                     value = getCellValue(cell);
                     break;
+                // 高版本使用
+                // case FORMULA:
                 case Cell.CELL_TYPE_STRING:
                     RichTextString rtxt = cell.getRichStringCellValue();
                     if (rtxt == null) {
@@ -787,4 +848,91 @@ public class ExcelOpe {
 	public void setReadDateFormat(DateFormat readDateFormat) {
 		this.readDateFormat = readDateFormat;
 	}
+
+    public boolean isXSSFWorkbook() {
+        return isXSSFWorkbook;
+    }
+
+    /**
+     * Excel 获取图片map
+     *
+     * @param sheetNo 指定sheet编号
+     * @return Map key:图片单元格索引（1_1）String，value:图片流
+     */
+    public Map<String, List<PictureData>> getCellPictureMap(int sheetNo) {
+        if (this.isXSSFWorkbook) {
+            return getCellPictureMap07(sheetNo);
+        } else {
+            return getCellPictureMap03(sheetNo);
+        }
+    }
+
+    /**
+     * Excel2003 获取图片map
+     *
+     * @param sheetNo 指定sheet编号
+     * @return Map key:图片单元格索引（1_1）String，value:图片流
+     */
+    public Map<String, List<PictureData>> getCellPictureMap03(int sheetNo) {
+        HSSFSheet sheet = ((HSSFWorkbook) wb).getSheetAt(sheetNo);
+        List<HSSFPictureData> pictures = ((HSSFWorkbook) wb).getAllPictures();
+        Map<String, List<PictureData>> picMap = new HashMap<>();
+        if (pictures.isEmpty()) {
+            return picMap;
+        }
+        for (HSSFShape shape : sheet.getDrawingPatriarch().getChildren()) {
+            HSSFClientAnchor anchor = (HSSFClientAnchor) shape.getAnchor();
+            if (!(shape instanceof HSSFPicture)) {
+                continue;
+            }
+            HSSFPicture pic = (HSSFPicture) shape;
+            int pictureIndex = pic.getPictureIndex() - 1;
+            HSSFPictureData picData = pictures.get(pictureIndex);
+            String picIndex = anchor.getRow1() + "_" + String.valueOf(anchor.getCol1());
+
+            picMap.compute(picIndex, (idxKey, list) -> {
+                if (list == null) {
+                    list = new ArrayList<>();
+                }
+                list.add(picData);
+                return list;
+            });
+        }
+        return picMap;
+    }
+
+    /**
+     * Excel2007 获取图片map
+     *
+     * @param sheetNo 指定sheet编号
+     * @return Map key:图片单元格索引（1_1）String，value:图片流
+     */
+    public Map<String, List<PictureData>> getCellPictureMap07(int sheetNo) {
+        XSSFSheet sheet = ((XSSFWorkbook) wb).getSheetAt(sheetNo);
+
+        Map<String, List<PictureData>> picMap = new HashMap<>();
+        for (POIXMLDocumentPart dr : sheet.getRelations()) {
+            if (!(dr instanceof XSSFDrawing)) {
+                continue;
+            }
+            XSSFDrawing drawing = (XSSFDrawing) dr;
+            List<XSSFShape> shapes = drawing.getShapes();
+            for (XSSFShape shape : shapes) {
+                XSSFPicture pic = (XSSFPicture) shape;
+                XSSFClientAnchor anchor = pic.getPreferredSize();
+                CTMarker ctMarker = anchor.getFrom();
+                XSSFPictureData picData = pic.getPictureData();
+                String picIndex = ctMarker.getRow() + "_" + ctMarker.getCol();
+
+                picMap.compute(picIndex, (idxKey, list) -> {
+                    if (list == null) {
+                        list = new ArrayList<>();
+                    }
+                    list.add(picData);
+                    return list;
+                });
+            }
+        }
+        return picMap;
+    }
 }

@@ -8,7 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 
@@ -22,7 +22,7 @@ public class JacksonUtil {
 
     // ObjectMapper new的开销比较大，设置两个用于复用的实例
     // 常用的用于复用的实例1
-    public static JacksonUtil jackson = new JacksonUtil().withIgnoreUnknownPro().withDisFailUnknown();
+    public static JacksonUtil jackson = new JacksonUtil().withIgnoreUnknownPro().disableFailUnknown();
 
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -70,7 +70,7 @@ public class JacksonUtil {
      * String[]强转成数组
      * @return 链式返回
      */
-    public JacksonUtil withDisStringAsArray() {
+    public JacksonUtil disableStringAsArray() {
         mapper.disable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
         return this;
     }
@@ -79,12 +79,12 @@ public class JacksonUtil {
      * date转化成timeZone
      * @return 链式返回
      */
-    public JacksonUtil withDisDataAsTimeZone() {
+    public JacksonUtil disableDataAsTimeZone() {
         mapper.disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE);
         return this;
     }
 
-    public JacksonUtil withDisFETCH() {
+    public JacksonUtil disableFetch() {
         mapper.disable(DeserializationFeature.EAGER_DESERIALIZER_FETCH);
         return this;
     }
@@ -93,7 +93,7 @@ public class JacksonUtil {
      * 失败忽略
      * @return 链式返回
      */
-    public JacksonUtil withDisFailIgnoged() {
+    public JacksonUtil disableFailIgnoged() {
         mapper.disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES);
         return this;
     }
@@ -102,7 +102,7 @@ public class JacksonUtil {
      * 未知属性
      * @return 链式返回
      */
-    public JacksonUtil withDisFailUnknown() {
+    public JacksonUtil disableFailUnknown() {
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         return this;
     }
@@ -205,11 +205,11 @@ public class JacksonUtil {
     }
 
     /**
-     * 配置对象工厂
+     * 格式化输出
      * @return 链式返回
      */
-    public JacksonUtil withConstruct() {
-        mapper.getSerializationConfig().constructDefaultPrettyPrinter();
+    public JacksonUtil withPrettyPrint() {
+        mapper.writerWithDefaultPrettyPrinter();
         return this;
     }
 
@@ -233,10 +233,10 @@ public class JacksonUtil {
     }
 
     /**
-     * 是否缩放排列输出
+     * 填充缩进排列输出
      * @return 链式返回
      */
-    public JacksonUtil withOrder() {
+    public JacksonUtil withIndent() {
         mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
         return this;
     }
@@ -246,7 +246,7 @@ public class JacksonUtil {
      * @return 链式返回
      */
     public JacksonUtil withRoot() {
-        mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
+        mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, true);
         return this;
     }
 
@@ -254,8 +254,8 @@ public class JacksonUtil {
      * 转化成全小写
      * @return 链式返回
      */
-    public JacksonUtil with2Lower() {
-        mapper.setPropertyNamingStrategy(PropertyNamingStrategy.LOWER_CASE);
+    public JacksonUtil with2LowerCase() {
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.LOWER_CASE);
         return this;
     }
 
