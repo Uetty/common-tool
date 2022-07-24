@@ -38,11 +38,11 @@
 		<org.apache.poi.version>3.12</org.apache.poi.version>
 		<itextpdf.itextpdf.version>5.5.13</itextpdf.itextpdf.version>
 		<pdfbox.version>2.0.17</pdfbox.version>
-		<pinyin4j.version>2.5.0</pinyin4j.version>
+		<pinyin4j.version>2.5.1</pinyin4j.version>
 		<dnsjava.version>2.1.9</dnsjava.version>
 		<fastjson.version>1.2.56</fastjson.version>
 		<logback.version>1.2.3</logback.version>
-		<jackson.version>[2.9.8,)</jackson.version>
+		<jackson.version>2.13.3</jackson.version>
 		<codehaus.jackson.version>1.8.3</codehaus.jackson.version>
 		<gson.version>2.2.4</gson.version>
 		<aws.version>1.11.347</aws.version>

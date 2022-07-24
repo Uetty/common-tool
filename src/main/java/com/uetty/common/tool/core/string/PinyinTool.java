@@ -1,4 +1,4 @@
-package com.uetty.common.tool.core;
+package com.uetty.common.tool.core.string;
 
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
@@ -97,5 +97,11 @@ public class PinyinTool {
 		}
 		return sb.toString();
 	}
-	
+
+	public static void main(String[] args) {
+
+		System.out.println(toPinyinString("大范围weFerw234"));
+		System.out.println(toPinyinWithTone("大范围weFerw234"));
+		System.out.println(toPinyinAbbreviation("大范围weFerw234"));
+	}
 }
