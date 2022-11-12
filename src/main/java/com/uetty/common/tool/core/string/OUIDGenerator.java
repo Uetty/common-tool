@@ -141,20 +141,19 @@ public class OUIDGenerator {
             // spi机制获取IP
             byte[] address = getIpBySpi();
             if (address == null) {
-
                 address = InetAddress.getLocalHost().getAddress();
+            }
 
-                // 从环境变量获取IP
-                Byte[] rewriteIpSegments = getRewriteIpSegmentsByEnv();
-                if (rewriteIpSegments == null) {
-                    rewriteIpSegments = REWRITE_IP_SEGMENT;
-                }
+            // 从环境变量获取替换IP
+            Byte[] rewriteIpSegments = getRewriteIpSegmentsByEnv();
+            if (rewriteIpSegments == null) {
+                rewriteIpSegments = REWRITE_IP_SEGMENT;
+            }
 
-                // 替换特定位IP
-                for (int i = 0; i < address.length; i++) {
-                    if (rewriteIpSegments.length > i && rewriteIpSegments[i] != null) {
-                        address[i] = rewriteIpSegments[i];
-                    }
+            // 替换特定位IP
+            for (int i = 0; i < address.length; i++) {
+                if (rewriteIpSegments.length > i && rewriteIpSegments[i] != null) {
+                    address[i] = rewriteIpSegments[i];
                 }
             }
 
@@ -179,7 +178,6 @@ public class OUIDGenerator {
     private static long toLong(byte[] bytes) {
         long result = 0;
         for (int i = 0; i < 4; i++) {
-            System.out.println(bytes[i] + " --> " + (0xff & bytes[i]));
             result = (result << 8) + (0xff & bytes[i]);
         }
         return result;
