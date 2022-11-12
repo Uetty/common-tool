@@ -1,5 +1,6 @@
 package com.uetty.common.tool.core.string;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.formula.functions.T;
 
 import java.util.*;
@@ -274,4 +275,65 @@ public class StringUtil {
 		return !isEmpty(str);
 	}
 
+	public static boolean equals(String str1, String str2) {
+		if (str1 == null && str2 == null) {
+			return true;
+		}
+		if (str1 == null || str2 == null) {
+			return false;
+		}
+		if (str1.length() != str2.length()) {
+			return false;
+		}
+		return str1.equals(str2);
+	}
+
+	public static boolean equalsIgc(String str1, String str2) {
+		if (str1 == null && str2 == null) {
+			return true;
+		}
+		if (str1 == null || str2 == null) {
+			return false;
+		}
+		if (str1.length() != str2.length()) {
+			return false;
+		}
+		return str1.equalsIgnoreCase(str2);
+	}
+
+	/**
+	 * 空值安全的equals比较（去除前后空白字符后比较）
+	 */
+	public static boolean equalsNbs(String str1, String str2) {
+		if (str1 == null && str2 == null) {
+			return true;
+		}
+		if (str1 == null || str2 == null) {
+			return false;
+		}
+		str1 = str1.trim();
+		str2 = str2.trim();
+		if (str1.length() != str2.length()) {
+			return false;
+		}
+		return str1.equals(str2);
+	}
+
+	/**
+	 * 空值安全的equals比较（忽略大小写，去除前后空白字符）
+	 */
+	public static boolean equalsIgcNbs(String str1, String str2) {
+		if (str1 == null && str2 == null) {
+			return true;
+		}
+		if (str1 == null || str2 == null) {
+			return false;
+		}
+		str1 = str1.trim();
+		str2 = str2.trim();
+		if (str1.length() != str2.length()) {
+			return false;
+		}
+		return str1.equalsIgnoreCase(str2);
+	}
 }
