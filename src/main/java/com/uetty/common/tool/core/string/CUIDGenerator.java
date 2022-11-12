@@ -36,30 +36,16 @@ public class CUIDGenerator {
         return new String(temp);
     }
 
-    private static String format36(long val, int len) {
-        char[] chars = Long.toString(val, 36).toCharArray();
-        int charsLen = chars.length;
-        if (charsLen >= len) {
-            return new String(chars, charsLen - len, len);
-        }
-        char[] temp = new char[len];
-        for (int i = 0; i < len - charsLen; i++) {
-            temp[i] = '0';
-        }
-        System.arraycopy(chars, 0, temp, len - charsLen, charsLen);
-        return new String(temp);
-    }
+    public static final String JVM_ID = initJvm();
 
-    public static final String JVM_ID = initJVM();
-
-    private static String initJVM() {
-        long ipadd;
+    private static String initJvm() {
+        long ipAddr;
         try {
-            ipadd = toLong(InetAddress.getLocalHost().getAddress());
+            ipAddr = toLong(InetAddress.getLocalHost().getAddress());
         } catch (Exception e) {
-            ipadd = 0;
+            ipAddr = 0;
         }
-        return String.format("%08x", ipadd) + getTime();
+        return String.format("%08x", ipAddr) + getTime();
     }
 
     private static final AtomicInteger SEQ = new AtomicInteger((int) (Math.random() * Integer.MAX_VALUE / 1000));
