@@ -1,6 +1,8 @@
 package com.uetty.common.tool.core.string;
 
 import java.net.InetAddress;
+import java.util.Iterator;
+import java.util.ServiceLoader;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -9,6 +11,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author vince
  */
 public class OUIDGenerator {
+
+    public interface Ipv4Provider {
+        byte[]  getIp();
+    }
 
     /**
      * 开头时间戳编码表（为了保持有序性，该表即使替换字符集也需保持Ascii有序性）
@@ -80,20 +86,84 @@ public class OUIDGenerator {
 
     public static final String JVM_ID = initJvm();
 
+    /**
+     * spi机制获取IP
+     */
+    private static byte[] getIpBySpi() {
+        byte[] address = null;
+        ServiceLoader<Ipv4Provider> providerServiceLoader = ServiceLoader.load(Ipv4Provider.class);
+        Iterator<Ipv4Provider> iterator = providerServiceLoader.iterator();
+        if (iterator.hasNext()) {
+            // SPI 机制获取IP
+            Ipv4Provider provider = iterator.next();
+            address = provider.getIp();
+            if (address != null && address.length != 4) {
+                new IllegalArgumentException("ipv4 provider not provide ipv4 address").printStackTrace();
+                return null;
+            }
+        }
+        return address;
+    }
+
+    /**
+     * 从环境变量获取重写的IP位
+     */
+    private static Byte[] getRewriteIpSegmentsByEnv() {
+        Byte[] rewriteIpBytes = null;
+        String ouidRewriteIp = System.getenv("OUID_REWRITE_IP");
+        if (ouidRewriteIp != null) {
+            String[] split = ouidRewriteIp.split("\\.");
+            rewriteIpBytes = new Byte[4];
+            try {
+                for (int i = 0; i < 4; i++) {
+                    if ("%".equals(split[i])) {
+                        continue;
+                    }
+                    int num = Integer.parseInt(split[i]);
+                    if (num > 255 || num < 0) {
+                        throw new IllegalArgumentException("invalid rewrite ipv4 address " + ouidRewriteIp);
+                    }
+                    rewriteIpBytes[i] = (byte) (num > 127 ? num - 256 : num);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                rewriteIpBytes = null;
+            }
+        }
+        return rewriteIpBytes;
+    }
+
     @SuppressWarnings({"ConstantConditions", "RedundantSuppression"})
     private static String initJvm() {
         long ipAddr;
         try {
-            byte[] address = InetAddress.getLocalHost().getAddress();
-            for (int i = 0; i < address.length; i++) {
-                if (REWRITE_IP_SEGMENT.length > i && REWRITE_IP_SEGMENT[i] != null) {
-                    address[i] = REWRITE_IP_SEGMENT[i];
+
+            // spi机制获取IP
+            byte[] address = getIpBySpi();
+            if (address == null) {
+
+                address = InetAddress.getLocalHost().getAddress();
+
+                // 从环境变量获取IP
+                Byte[] rewriteIpSegments = getRewriteIpSegmentsByEnv();
+                if (rewriteIpSegments == null) {
+                    rewriteIpSegments = REWRITE_IP_SEGMENT;
+                }
+
+                // 替换特定位IP
+                for (int i = 0; i < address.length; i++) {
+                    if (rewriteIpSegments.length > i && rewriteIpSegments[i] != null) {
+                        address[i] = rewriteIpSegments[i];
+                    }
                 }
             }
+
             ipAddr = toLong(address);
         } catch (Exception e) {
+            e.printStackTrace();
             ipAddr = 0;
         }
+
         return format32(JVM_STAT_DIGITS, ipAddr, 7) + getTime(JVM_IP_DIGITS);
     }
 
@@ -109,6 +179,7 @@ public class OUIDGenerator {
     private static long toLong(byte[] bytes) {
         long result = 0;
         for (int i = 0; i < 4; i++) {
+            System.out.println(bytes[i] + " --> " + (0xff & bytes[i]));
             result = (result << 8) + (0xff & bytes[i]);
         }
         return result;
