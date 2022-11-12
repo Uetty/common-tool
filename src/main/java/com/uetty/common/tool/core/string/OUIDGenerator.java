@@ -4,11 +4,11 @@ import java.net.InetAddress;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Chronological Ordered Universally Unique Identifier
- * 时间顺序通用唯一标识符
+ * Ordered Universally Unique Identifier
+ * 时间顺序的通用唯一标识符
  * @author vince
  */
-public class CUIDGenerator {
+public class OUIDGenerator {
 
     /**
      * 开头时间戳编码表（为了保持有序性，该表即使替换字符集也需保持Ascii有序性）
