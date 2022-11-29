@@ -163,7 +163,7 @@ public class OUIDGenerator {
             ipAddr = 0;
         }
 
-        return format32(JVM_STAT_DIGITS, ipAddr, 7) + getTime(JVM_IP_DIGITS);
+        return format32(JVM_IP_DIGITS, ipAddr, 7) + getTime(JVM_STAT_DIGITS);
     }
 
     private static final AtomicInteger SEQ = new AtomicInteger((int) (Math.random() * Integer.MAX_VALUE / 1000));
