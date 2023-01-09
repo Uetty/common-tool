@@ -3,12 +3,22 @@ package com.uetty.common.tool.core.net;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.uetty.common.tool.core.json.fastxml.JacksonUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.*;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpMessage;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.*;
-import org.apache.http.entity.BufferedHttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
+import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -23,11 +33,13 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 @SuppressWarnings("unused")
 public class HttpClientUtil {
@@ -40,18 +52,25 @@ public class HttpClientUtil {
 
     private static final String DEFAULT_CONTENT_TYPE = "application/x-www-form-urlencoded";
     private static final String CONTENT_TYPE_JSON = "application/json";
+    private static final String CONTENT_TYPE_MULTIPART = "multipart/form-data";
     private static final String CONTENT_DISPOSITION = "Content-Disposition";
 
     // 将map型转为请求参数型
     @SuppressWarnings("unchecked")
     private static String buildParams(Map<String, Object> data) {
         StringBuilder sb = new StringBuilder();
-        if (data == null) return sb.toString();
+        if (data == null) {
+            return sb.toString();
+        }
         for (Map.Entry<String, Object> item : data.entrySet()) {
             String key = item.getKey();
             Object value = item.getValue();
-            if (key == null) continue;
-            if (value == null) value = "";
+            if (key == null) {
+                continue;
+            }
+            if (value == null) {
+                value = "";
+            }
 
             if (value instanceof List) {
                 List<Object> valList = (List<Object>) value;
@@ -62,7 +81,9 @@ public class HttpClientUtil {
                 addParam(sb, key, value);
             }
         }
-        if (sb.length() > 0) sb.delete(sb.length() - 1, sb.length());
+        if (sb.length() > 0) {
+            sb.delete(sb.length() - 1, sb.length());
+        }
         return sb.toString();
     }
 
@@ -72,14 +93,20 @@ public class HttpClientUtil {
     }
 
     private static BasicHeader newBasicHeader(String key, Object value) {
-        if (key == null) return null;
+        if (key == null) {
+            return null;
+        }
         key = key.toLowerCase();
-        if (value == null) value = "";
+        if (value == null) {
+            value = "";
+        }
         return new BasicHeader(key, value.toString());
     }
 
     private static void addParam(StringBuilder sb, String key, Object value) {
-        if (value == null) value = "";
+        if (value == null) {
+            value = "";
+        }
         try {
             sb.append(URLEncoder.encode(key, DEFAULT_CHARSET)).append("=");
             sb.append(URLEncoder.encode(value.toString(), DEFAULT_CHARSET)).append("&");
@@ -90,8 +117,12 @@ public class HttpClientUtil {
 
     @SuppressWarnings("unchecked")
     private static void addParams(List<NameValuePair> pairs, String key, Object value) {
-        if (key == null) return;
-        if (value == null) value = "";
+        if (key == null) {
+            return;
+        }
+        if (value == null) {
+            value = "";
+        }
         if (value instanceof List) {
             List<Object> valList = (List<Object>) value;
             for (Object val : valList) {
@@ -102,14 +133,60 @@ public class HttpClientUtil {
         }
     }
 
-    private static boolean isContentTypeJson(String contentType) {
-        return CONTENT_TYPE_JSON.equalsIgnoreCase(contentType);
+    /**
+     * 空值安全的startWith（忽略大小写）
+     */
+    private static boolean startsWithIgnoreCase(String str, String prefix) {
+        return (str != null && prefix != null && str.length() >= prefix.length() &&
+                str.regionMatches(true, 0, prefix, 0, prefix.length()));
     }
 
-    private static HttpEntity createEntity(Map<String, Object> params, String contentType) throws UnsupportedEncodingException, JsonProcessingException {
-        boolean contentTypeJson = isContentTypeJson(contentType);
-        if (contentTypeJson) {
+    private static boolean isContentTypeJson(String contentType) {
+        return startsWithIgnoreCase(contentType, CONTENT_TYPE_JSON);
+    }
+
+    private static boolean isContentTypeMultipart(String contentType) {
+        return startsWithIgnoreCase(contentType, CONTENT_TYPE_MULTIPART);
+    }
+    
+    private static String getContentTypeBoundary(String contentType) {
+        String[] params = contentType.split(";");
+        if (params.length < 2) {
+            return null;
+        }
+        for (String param : params) {
+            String[] split = param.trim().split("=");
+            if (split.length < 2) {
+                continue;
+            }
+            if ("boundary".equalsIgnoreCase(split[0])) {
+                return split[1].trim();
+            }
+        }
+        return null;
+    }
+
+    private static HttpEntity createEntity(HttpEntityEnclosingRequestBase httpRequest, Map<String, Object> params) throws UnsupportedEncodingException, JsonProcessingException {
+
+        Header contentTypeHeader = httpRequest.getFirstHeader(HTTP.CONTENT_TYPE);
+        String contentType = contentTypeHeader != null ? contentTypeHeader.getValue() : DEFAULT_CONTENT_TYPE;
+
+        if (isContentTypeJson(contentType)) {
             return new JsonStringEntity(params);
+        } else if (isContentTypeMultipart(contentType)) {
+            String boundary = getContentTypeBoundary(contentType);
+            MultipartEntity multipartEntity;
+            if (boundary != null && boundary.length() > 0) {
+                multipartEntity = new MultipartEntity(boundary, params);
+            } else {
+                multipartEntity = new MultipartEntity(null, params);
+                // 更新 boundary
+                boundary = multipartEntity.getBoundary();
+                contentType = CONTENT_TYPE_MULTIPART + "; boundary=" + boundary;
+                BasicHeader basicHeader = newBasicHeader(HTTP.CONTENT_TYPE, contentType);
+                httpRequest.setHeader(basicHeader);
+            }
+            return multipartEntity;
         } else {
             List<NameValuePair> nvps = new ArrayList<>();
             if (params != null && params.size() > 0) {
@@ -123,9 +200,8 @@ public class HttpClientUtil {
 
     private static void setParams(HttpEntityEnclosingRequestBase httpRequest, Map<String, Object> params) {
         try {
-            Header contentTypeHeader = httpRequest.getFirstHeader(HTTP.CONTENT_TYPE);
 
-            HttpEntity entity = createEntity(params, contentTypeHeader != null ? contentTypeHeader.getValue() : DEFAULT_CONTENT_TYPE);
+            HttpEntity entity = createEntity(httpRequest, params);
 
             httpRequest.setEntity(entity);
 
@@ -142,9 +218,13 @@ public class HttpClientUtil {
         }
         for (Map.Entry<String, Object> entry : headers.entrySet()) {
             String key = entry.getKey();
-            if (StringUtils.isBlank(key)) continue;
+            if (StringUtils.isBlank(key)) {
+                continue;
+            }
             Object value = entry.getValue();
-            if (value == null) value = "";
+            if (value == null) {
+                value = "";
+            }
             if (value instanceof List) {
                 List<Object> valList = (List<Object>) value;
                 for (Object val : valList) {
@@ -163,20 +243,33 @@ public class HttpClientUtil {
         return headerList;
     }
 
+    private static String getContentType(Map<String, Object> headers) {
+        for (Map.Entry<String, Object> entry : headers.entrySet()) {
+            if (HTTP.CONTENT_TYPE.equalsIgnoreCase(entry.getKey())) {
+                Object value = entry.getValue();
+                return value == null ? null : String.valueOf(value);
+            }
+        }
+        return null;
+    }
+
     private static void setHeaders(HttpMessage httpMessage, Map<String, Object> headers) {
         List<Header> list = buildHeaders(headers);
         String contentType = null;
-        for (Header header : list) {
+        for (int i = 0; i < list.size(); i++) {
+            Header header = list.get(i);
             if (HTTP.CONTENT_TYPE.equalsIgnoreCase(header.getName())) {
                 contentType = header.getValue();
+                list.remove(i);
                 break;
             }
         }
         if (contentType == null) {
-            BasicHeader basicHeader = newBasicHeader(HTTP.CONTENT_TYPE, contentType);
-            list.add(basicHeader);
+            contentType = DEFAULT_CONTENT_TYPE;
         }
-        if (list.size() == 0) return;
+        BasicHeader basicHeader = newBasicHeader(HTTP.CONTENT_TYPE, contentType);
+        list.add(basicHeader);
+
         httpMessage.setHeaders(list.toArray(new Header[0]));
     }
 
@@ -191,7 +284,9 @@ public class HttpClientUtil {
         Map<String, List<String>> headerMap = new HashMap<>();
         for (Header header : headers) {
             String name = header.getName();
-            if (name == null) continue;
+            if (name == null) {
+                continue;
+            }
             List<String> values = headerMap.computeIfAbsent(name, k -> new ArrayList<>());
             values.add(header.getValue());
         }
@@ -206,7 +301,7 @@ public class HttpClientUtil {
         return httpPost;
     }
 
-    private static HttpGet createGet(String uri, Map<String, Object> headers, Map<String, Object> params) {
+    private static HttpGetWithEntity createGet(String uri, Map<String, Object> headers, Map<String, Object> params) {
         String paramStr = buildParams(params);
         if (paramStr.length() > 0) {
             if (uri.indexOf('?') == -1) {
@@ -216,8 +311,14 @@ public class HttpClientUtil {
             }
             uri += paramStr;
         }
-        HttpGet httpGet = new HttpGet(uri);
+        HttpGetWithEntity httpGet = new HttpGetWithEntity(uri);
         setHeaders(httpGet, headers);
+        String contentType = getContentType(headers);
+        boolean contentTypeMultipart = isContentTypeMultipart(contentType);
+        boolean contentTypeJson = isContentTypeJson(contentType);
+        if (contentTypeJson || contentTypeMultipart) {
+            setParams(httpGet, params);
+        }
         httpGet.setConfig(getRequestConfig());
         return httpGet;
     }
@@ -294,7 +395,7 @@ public class HttpClientUtil {
     }
 
     public static HttpResponseVo doGet(String uri, Map<String, Object> headers, Map<String, Object> params) {
-        HttpGet httpGet = createGet(uri, headers, params);
+        HttpGetWithEntity httpGet = createGet(uri, headers, params);
         return doRequest(httpGet);
     }
 
@@ -308,19 +409,19 @@ public class HttpClientUtil {
         return doRequest(httpDelete);
     }
 
-    public static HttpResponseVo doGetLoad(String uri, Map<String, Object> headers, Map<String, Object> params) {
-        HttpGet httpGet = createGet(uri, headers, params);
+    public static HttpResponseVo doGetLoad(String uri, Consumer<InputStream> inputStreamConsumer, Map<String, Object> headers, Map<String, Object> params) {
+        HttpGetWithEntity httpGet = createGet(uri, headers, params);
 
-        return doLoad(httpGet);
+        return doLoad(httpGet, inputStreamConsumer);
     }
 
-    public static HttpResponseVo doPostLoad(String uri, Map<String, Object> headers, Map<String, Object> params) {
+    public static HttpResponseVo doPostLoad(String uri, Consumer<InputStream> inputStreamConsumer, Map<String, Object> headers, Map<String, Object> params) {
         HttpPost httpPost = createPost(uri, headers, params);
 
-        return doLoad(httpPost);
+        return doLoad(httpPost, inputStreamConsumer);
     }
 
-    private static HttpResponseVo doLoad(HttpUriRequest request) {
+    private static HttpResponseVo doLoad(HttpUriRequest request, Consumer<InputStream> inputStreamConsumer) {
         HttpResponseVo hrr = new HttpResponseVo();
         HttpClientBuilder httpClientBuilder = getHttpClientBuilder();
 
@@ -330,30 +431,62 @@ public class HttpClientUtil {
             int code = response.getStatusLine().getStatusCode();
             Map<String, List<String>> headers = getResponseHeaders(response);
             HttpEntity entity = response.getEntity();
-            BufferedHttpEntity bufferedHttpEntity = new BufferedHttpEntity(entity);
 
             hrr.setCode(code);
             hrr.setHeaders(headers);
-            hrr.setInputStream(bufferedHttpEntity.getContent());
 
             List<String> dispositions = headers.get(CONTENT_DISPOSITION);
             if (dispositions != null && dispositions.size() > 0 && dispositions.get(0).contains("filename=")) {
                 String fileNameDisp = dispositions.get(0);
                 String fileName = fileNameDisp.substring(fileNameDisp.indexOf("filename=") + 9);
-                if (fileName.length() > 0 && !"".equals(fileName.trim())) hrr.setFileName(fileName);
+                if (fileName.length() > 0 && !"".equals(fileName.trim())) {
+                    hrr.setFileName(fileName);
+                }
             }
+
+            inputStreamConsumer.accept(entity.getContent());
 
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
         }
         return hrr;
     }
+
+    /**
+     * 违反正统规范的GET请求包含请求体
+     */
+    private static class HttpGetWithEntity extends HttpEntityEnclosingRequestBase {
+
+        public static final String METHOD_NAME = "GET";
+
+        public HttpGetWithEntity() {
+            super();
+        }
+
+        public HttpGetWithEntity(final URI uri) {
+            super();
+            setURI(uri);
+        }
+
+        /**
+         * @throws IllegalArgumentException if the uri is invalid.
+         */
+        public HttpGetWithEntity(final String uri) {
+            super();
+            setURI(URI.create(uri));
+        }
+
+        @Override
+        public String getMethod() {
+            return METHOD_NAME;
+        }
+    }
+
     public static class HttpResponseVo {
 
         private Integer code;
         private Map<String, List<String>> headers;
         private String body;
-        private InputStream inputStream;
         private String fileName;
 
         @SuppressWarnings("unused")
@@ -383,14 +516,6 @@ public class HttpClientUtil {
             this.body = body;
         }
 
-        public InputStream getInputStream() {
-            return inputStream;
-        }
-
-        public void setInputStream(InputStream inputStream) {
-            this.inputStream = inputStream;
-        }
-
         public String getFileName() {
             return fileName;
         }
@@ -403,9 +528,25 @@ public class HttpClientUtil {
     private static class JsonStringEntity extends StringEntity {
 
         public JsonStringEntity(Map<String, Object> parameters) throws JsonProcessingException {
-            super(JacksonUtil.jackson.obj2Json(parameters), ContentType.APPLICATION_JSON);
+            super(JacksonUtil.getDefault().obj2Json(parameters), ContentType.APPLICATION_JSON);
         }
     }
 
+    private static class MultipartEntity extends InputStreamEntity {
 
+
+        public MultipartEntity(String boundary, Map<String, Object> params) {
+            super(new MultipartInputStream(boundary, params));
+        }
+
+        public String getBoundary() {
+            try {
+                MultipartInputStream content = (MultipartInputStream) super.getContent();
+
+                return content.getBoundary();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 }

@@ -4,6 +4,7 @@ import com.uetty.common.tool.core.FileUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -21,12 +22,20 @@ public class DigestUtil {
         return calculateDigest(file, "MD5");
     }
 
+    public static String md5Sum(byte[] bytes) throws NoSuchAlgorithmException, IOException {
+        return calculateDigest(bytes, "MD5");
+    }
+
     public static String sha1Sum(File file) throws IOException, NoSuchAlgorithmException {
         return calculateDigest(file, "SHA-1");
     }
 
     public static String sha1Sum(String str) throws NoSuchAlgorithmException {
         return calculateDigest(str, "SHA-1");
+    }
+
+    public static String sha1Sum(byte[] bytes) throws NoSuchAlgorithmException {
+        return calculateDigest(bytes, "SHA-1");
     }
 
     public static String sha224Sum(File file) throws IOException, NoSuchAlgorithmException {
@@ -37,12 +46,20 @@ public class DigestUtil {
         return calculateDigest(str, "SHA-224");
     }
 
+    public static String sha224Sum(byte[] bytes) throws NoSuchAlgorithmException {
+        return calculateDigest(bytes, "SHA-224");
+    }
+
     public static String sha256Sum(File file) throws IOException, NoSuchAlgorithmException {
         return calculateDigest(file, "SHA-256");
     }
 
     public static String sha256Sum(String str) throws NoSuchAlgorithmException {
         return calculateDigest(str, "SHA-256");
+    }
+
+    public static String sha256Sum(byte[] bytes) throws NoSuchAlgorithmException {
+        return calculateDigest(bytes, "SHA-256");
     }
 
     public static String sha384Sum(File file) throws IOException, NoSuchAlgorithmException {
@@ -53,12 +70,20 @@ public class DigestUtil {
         return calculateDigest(str, "SHA-384");
     }
 
+    public static String sha384Sum(byte[] bytes) throws NoSuchAlgorithmException {
+        return calculateDigest(bytes, "SHA-384");
+    }
+
     public static String sha512Sum(File file) throws IOException, NoSuchAlgorithmException {
         return calculateDigest(file, "SHA-512");
     }
 
     public static String sha512Sum(String str) throws NoSuchAlgorithmException {
         return calculateDigest(str, "SHA-512");
+    }
+
+    public static String sha512Sum(byte[] bytes) throws NoSuchAlgorithmException {
+        return calculateDigest(bytes, "SHA-512");
     }
 
     private static String calculateDigest(File file, String algorithm) throws NoSuchAlgorithmException, IOException {
@@ -80,6 +105,16 @@ public class DigestUtil {
         return toHexString(digest);
     }
 
+    private static String calculateDigest(byte[] bytes, String algorithm) throws NoSuchAlgorithmException {
+        // 获取算法对象
+        MessageDigest instance = MessageDigest
+                .getInstance(algorithm);
+
+        byte[] digest = instance.digest(bytes);// 对字符串加密，返回字符数组
+
+        return toHexString(digest);
+    }
+
     private static String toHexString(byte[] digest) {
         StringBuilder sb = new StringBuilder();
         for (byte b : digest) {
@@ -94,11 +129,13 @@ public class DigestUtil {
     }
 
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
-        System.out.println(md5Sum(new File("/IdeaProjects/common-parent/common-tool/src/main/java/com/uetty/common/tool/core/UuidUtil.java")));
-        System.out.println(sha1Sum(new File("/IdeaProjects/common-parent/common-tool/src/main/java/com/uetty/common/tool/core/UuidUtil.java")));
-        System.out.println(sha256Sum(new File("/IdeaProjects/common-parent/common-tool/src/main/java/com/uetty/common/tool/core/UuidUtil.java")));
-        System.out.println(sha512Sum(new File("/IdeaProjects/common-parent/common-tool/src/main/java/com/uetty/common/tool/core/UuidUtil.java")));
-        System.out.println(sha384Sum(new File("/IdeaProjects/common-parent/common-tool/src/main/java/com/uetty/common/tool/core/UuidUtil.java")));
-        System.out.println(sha224Sum(new File("/IdeaProjects/common-parent/common-tool/src/main/java/com/uetty/common/tool/core/UuidUtil.java")));
+        InputStream resourceAsStream = DigestUtil.class.getResourceAsStream("DigestUtil.class");
+        byte[] bytes = FileUtil.readToByte(resourceAsStream);
+        System.out.println(md5Sum(bytes));
+        System.out.println(sha1Sum(bytes));
+        System.out.println(sha256Sum(bytes));
+        System.out.println(sha512Sum(bytes));
+        System.out.println(sha384Sum(bytes));
+        System.out.println(sha224Sum(bytes));
     }
 }
