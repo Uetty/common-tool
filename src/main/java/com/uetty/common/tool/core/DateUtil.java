@@ -47,17 +47,73 @@ public class DateUtil {
 		}
 		return formatIgnoreNull(format, new Date(timestamp));
 	}
-	
-	public static Date addDay(Date d, int day) {
-		if (d == null) {
-			return null;
-		}
-		Calendar c = Calendar.getInstance();
-		c.setTime(d);
-		c.add(Calendar.DAY_OF_YEAR, day);
-		return c.getTime();
+
+	public static Calendar toCalendar(final Date date) {
+		final Calendar c = Calendar.getInstance();
+		c.setTime(date);
+		return c;
 	}
-	
+
+	public static boolean isSameDay(final Date date1, final Date date2) {
+		final Calendar cal1 = toCalendar(date1);
+		final Calendar cal2 = toCalendar(date2);
+		return cal1.get(Calendar.ERA) == cal2.get(Calendar.ERA) && cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)
+				&& cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+	}
+
+	/**
+	 * 计算N天之后的日期
+	 */
+	public static Date addDays(final Date date, final int amount) {
+		final Calendar cal = toCalendar(date);
+		cal.add(Calendar.DAY_OF_MONTH, amount);
+		return cal.getTime();
+	}
+
+	/**
+	 * 计算N月之后的日期
+	 */
+	public static Date addMonth(final Date date, final int amount) {
+		final Calendar cal = toCalendar(date);
+		cal.add(Calendar.MONTH, amount);
+		return cal.getTime();
+	}
+	/**
+	 * 计算N年之后的日期
+	 * @param date
+	 * @param amount
+	 * @return
+	 */
+	public static Date addYear(final Date date, final int amount) {
+		final Calendar cal = toCalendar(date);
+		cal.add(Calendar.YEAR, amount);
+		return cal.getTime();
+	}
+
+	public static Date addHours(Date date, int i) {
+		final Calendar cal = toCalendar(date);
+		cal.add(Calendar.HOUR_OF_DAY, i);
+		return cal.getTime();
+	}
+
+	public static Date addMinutes(Date date, int i) {
+		final Calendar cal = toCalendar(date);
+		cal.add(Calendar.MINUTE, i);
+		return cal.getTime();
+	}
+
+	public static Date addSeconds(Date date, int i) {
+		final Calendar cal = toCalendar(date);
+		cal.add(Calendar.SECOND, i);
+		return cal.getTime();
+	}
+
+	public static Date addMilliSeconds(Date date, int i) {
+		final Calendar cal = toCalendar(date);
+		cal.add(Calendar.MILLISECOND, i);
+		return cal.getTime();
+	}
+
 	/**
 	 * 字符串转时间
 	 * @param format 匹配格式
@@ -100,5 +156,13 @@ public class DateUtil {
 		c.set(Calendar.SECOND, 0);
 		c.set(Calendar.MILLISECOND, 0);
 		return c.getTime();
+	}
+
+	public static long getDurationSeconds(Date date1, Date date2) {
+		if (date1 == null || date2 == null) {
+			return 0;
+		}
+		long duration = date2.getTime() - date1.getTime();
+		return (duration / 1000);
 	}
 }

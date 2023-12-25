@@ -1,0 +1,1 @@
+<#--图片 base64 pkg 循环--><#macro render imagesIndex>    <#if imagesIndex?? >        <#list imagesIndex as item>            <Relationship Id="${(item.relationId)?if_exists?xml}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/img_${(item.name)?if_exists?xml}"/>        </#list>    </#if></#macro>

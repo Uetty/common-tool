@@ -1,93 +1,110 @@
-package com.uetty.common.tool.core.aliyun;
+package com.uetty.common.tool.core.cloud.huaweiyun.obs;
 
-import com.aliyun.oss.ClientConfiguration;
-import com.aliyun.oss.OSSClient;
-import com.aliyun.oss.common.auth.CredentialsProvider;
-import com.aliyun.oss.common.auth.DefaultCredentialProvider;
-import com.aliyun.oss.common.comm.Protocol;
-import com.aliyun.oss.internal.OSSHeaders;
-import com.aliyun.oss.model.GeneratePresignedUrlRequest;
-import com.aliyun.oss.model.OSSObject;
-import com.aliyun.oss.model.ObjectMetadata;
-import com.aliyun.oss.model.PutObjectRequest;
-import com.aliyun.oss.model.PutObjectResult;
+import com.obs.services.BasicObsCredentialsProvider;
+import com.obs.services.ObsClient;
+import com.obs.services.ObsConfiguration;
+import com.obs.services.internal.ObsHeaders;
+import com.obs.services.model.HttpMethodEnum;
+import com.obs.services.model.HttpProtocolTypeEnum;
+import com.obs.services.model.ObjectMetadata;
+import com.obs.services.model.ObsObject;
+import com.obs.services.model.PutObjectRequest;
+import com.obs.services.model.PutObjectResult;
+import com.obs.services.model.SpecialParamEnum;
+import com.obs.services.model.TemporarySignatureRequest;
+import com.obs.services.model.TemporarySignatureResponse;
+import com.uetty.common.tool.core.DateUtil;
 import com.uetty.common.tool.core.Mimetypes;
 import com.uetty.common.tool.core.string.StringUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 
 @Slf4j
-public class AliOSSUtil {
+public class HuaweiyunObsUtil {
 
     @Data
-    private static class OSSEndpoint {
+    private static class ObsEndpoint {
         String accessKey;
         String secret;
         String endpoint;
     }
 
-    private static class OSSClientWrapper {
+    private static class ObsClientWrapper {
 
-        OSSClient ossClient;
+        ObsClient obsClient;
 
         @Override
         protected void finalize() {
             // shutdown before gc
-            ossClient.shutdown();
+            try {
+                obsClient.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    private static final WeakHashMap<OSSEndpoint, OSSClientWrapper> CLIENT_CACHE = new WeakHashMap<>();
+    private static final WeakHashMap<ObsEndpoint, ObsClientWrapper> CLIENT_CACHE = new WeakHashMap<>();
 
-    private static OSSClient getFromCache(OSSEndpoint endpoint) {
+    private static ObsClient getFromCache(ObsEndpoint endpoint) {
         synchronized (CLIENT_CACHE) {
-            final OSSClientWrapper wrapper = CLIENT_CACHE.get(endpoint);
+            final ObsClientWrapper wrapper = CLIENT_CACHE.get(endpoint);
             if (wrapper != null) {
-                return wrapper.ossClient;
+                return wrapper.obsClient;
             } else {
                 return null;
             }
         }
     }
 
-    private static void putClientCache(OSSEndpoint endpoint, OSSClient ossClient) {
+    private static void putClientCache(ObsEndpoint endpoint, ObsClient obsClient) {
         synchronized (CLIENT_CACHE) {
-            OSSClientWrapper wrapper = new OSSClientWrapper();
-            wrapper.ossClient = ossClient;
+            ObsClientWrapper wrapper = new ObsClientWrapper();
+            wrapper.obsClient = obsClient;
             CLIENT_CACHE.put(endpoint, wrapper);
         }
     }
 
-    private static OSSEndpoint newOSSEndpoint(String accessKey, String secret, String endpoint) {
-        OSSEndpoint ossEndpoint = new OSSEndpoint();
-        ossEndpoint.setAccessKey(accessKey);
-        ossEndpoint.setSecret(secret);
-        ossEndpoint.setEndpoint(endpoint);
-        return ossEndpoint;
+    private static ObsEndpoint newOSSEndpoint(String accessKey, String secret, String endpoint) {
+        ObsEndpoint obSEndpoint = new ObsEndpoint();
+        obSEndpoint.setAccessKey(accessKey);
+        obSEndpoint.setSecret(secret);
+        obSEndpoint.setEndpoint(endpoint);
+        return obSEndpoint;
     }
 
     /**
      * 初始化OSS
      */
-    public static OSSClient obtainClient(String accessKey, String secret, String endpoint) {
-        OSSEndpoint ossEndpoint = newOSSEndpoint(accessKey, secret, endpoint);
-        // OSSClient 是线程安全的，所以可以缓存多线程共用
-        OSSClient ossClient = getFromCache(ossEndpoint);
-        if (ossClient == null) {
-            CredentialsProvider credentialProvider = new DefaultCredentialProvider(accessKey, secret);
-            ClientConfiguration clientConfiguration = new ClientConfiguration();
-            clientConfiguration.setProtocol(Protocol.HTTPS);
-            ossClient = new OSSClient(endpoint, credentialProvider, clientConfiguration);
-            putClientCache(ossEndpoint, ossClient);
+    public static ObsClient obtainClient(String accessKey, String secret, String endpoint) {
+        ObsEndpoint obSEndpoint = newOSSEndpoint(accessKey, secret, endpoint);
+        // ObsClient 是线程安全的，所以可以缓存多线程共用
+        ObsClient obsClient = getFromCache(obSEndpoint);
+        if (obsClient == null) {
+            BasicObsCredentialsProvider credentialProvider = new BasicObsCredentialsProvider(accessKey, secret);
+            ObsConfiguration obsConfiguration = new ObsConfiguration();
+            obsConfiguration.setEndPoint(endpoint);
+            obsClient = new ObsClient(credentialProvider, obsConfiguration);
+            putClientCache(obSEndpoint, obsClient);
         }
-        return ossClient;
+        return obsClient;
+    }
+
+    public static ObsClient obtainClientBySts(String accessKey, String secret, String stsToken, String endpoint) {
+        BasicObsCredentialsProvider credentialProvider = new BasicObsCredentialsProvider(accessKey, secret, stsToken);
+        ObsConfiguration obsConfiguration = new ObsConfiguration();
+        obsConfiguration.setEndPoint(endpoint);
+        // STS 方式的由于token一段时间变化一次，这里的缓存功能不够强大，不适合在这里加缓存
+        return new ObsClient(credentialProvider, obsConfiguration);
     }
 
     /**
@@ -108,19 +125,19 @@ public class AliOSSUtil {
         if (headers == null) {
             return;
         }
-        final String userMetadataPrefix = OSSHeaders.OSS_USER_METADATA_PREFIX;
+        final String userMetadataPrefix = ObsHeaders.getInstance().headerPrefix();
         int userMetadataPrefixLength = userMetadataPrefix.length();
         headers.forEach((key, value) -> {
             if (StringUtil.isBlank(key)) {
                 return;
             }
             key = key.toLowerCase().trim();
-            if (key.startsWith(OSSHeaders.OSS_USER_METADATA_PREFIX)) {
+            if (key.startsWith(userMetadataPrefix)) {
                 if (key.length() > userMetadataPrefixLength) {
                     objectMetadata.addUserMetadata(key.substring(userMetadataPrefixLength), (value == null) ? "" : value.toString());
                 }
             } else {
-                objectMetadata.setHeader(key, value);
+                objectMetadata.addUserMetadata(key, (value == null) ? "" : value.toString());
             }
         });
     }
@@ -134,21 +151,22 @@ public class AliOSSUtil {
     /**
      * 上传文件到OSS
      */
-    public static PutObjectResult putObject(OSSClient ossClient, String bucketName, String keyName, File file, Map<String, Object> headers) {
+    public static PutObjectResult putObject(ObsClient obsClient, String bucketName, String keyName, File file, Map<String, Object> headers) {
         // file方式，ObjectMetadata会自动初始化：Content-Type、Content-Length这几个值
         // OSSHeaders.CONTENT_TYPE、OSSHeaders.CONTENT_LENGTH、OSSHeaders.CONTENT_DISPOSITION
         PutObjectRequest req = new PutObjectRequest(bucketName, keyName, file);
         ObjectMetadata objectMetadata = req.getMetadata();
         setContentType(objectMetadata, file);
-        setHeader(objectMetadata,headers);
-        return ossClient.putObject(req);
+        setHeader(objectMetadata, headers);
+
+        return obsClient.putObject(req);
     }
 
     /**
      * 上传文件到OSS
      */
-    public static PutObjectResult putObject(OSSClient ossClient, String bucketName, String keyName, File file) {
-        return putObject(ossClient, bucketName, keyName, file, null);
+    public static PutObjectResult putObject(ObsClient obsClient, String bucketName, String keyName, File file) {
+        return putObject(obsClient, bucketName, keyName, file, null);
     }
 
     /**
@@ -168,14 +186,16 @@ public class AliOSSUtil {
     /**
      * 上传文件到OSS
      */
-    public static PutObjectResult putObject(OSSClient ossClient, String bucketName, String keyName, InputStream inputStream, Map<String, Object> headers) {
+    public static PutObjectResult putObject(ObsClient obsClient, String bucketName, String keyName, InputStream inputStream, Map<String, Object> headers) {
         // inputStream方式，如果未设置Content-Type，ObjectMetadata会自动根据keyName初始化Content-Type
         // 最好要设置 OSSHeaders.CONTENT_TYPE、OSSHeaders.CONTENT_LENGTH、OSSHeaders.CONTENT_DISPOSITION
         ObjectMetadata objectMetadata = new ObjectMetadata();
         setHeader(objectMetadata, headers);
-        PutObjectRequest req = new PutObjectRequest(bucketName, keyName, inputStream, objectMetadata);
 
-        return ossClient.putObject(req);
+        PutObjectRequest req = new PutObjectRequest(bucketName, keyName, inputStream);
+        req.setMetadata(objectMetadata);
+
+        return obsClient.putObject(req);
     }
 
     /**
@@ -188,23 +208,23 @@ public class AliOSSUtil {
     /**
      * 从OSS下载文件
      */
-    public static OSSObject getObject(OSSClient ossClient, String bucketName, String keyName) {
-        return ossClient.getObject(bucketName, keyName);
+    public static ObsObject getObject(ObsClient obsClient, String bucketName, String keyName) {
+        return obsClient.getObject(bucketName, keyName);
     }
 
     /**
      * 从OSS下载文件
      */
-    public static OSSObject getObject(String accessKey, String secret, String endpoint, String bucketName, String keyName) {
+    public static ObsObject getObject(String accessKey, String secret, String endpoint, String bucketName, String keyName) {
         return getObject(obtainClient(accessKey, secret, endpoint), bucketName, keyName);
     }
 
     /**
      * 从OSS下载文件
      */
-    public static InputStream getObjectInputStream(OSSClient ossClient, String bucketName, String keyName) {
-        OSSObject ossObject = getObject(ossClient, bucketName, keyName);
-        return ossObject.getObjectContent();
+    public static InputStream getObjectInputStream(ObsClient obsClient, String bucketName, String keyName) {
+        ObsObject obsObject = getObject(obsClient, bucketName, keyName);
+        return obsObject.getObjectContent();
     }
 
     /**
@@ -217,11 +237,14 @@ public class AliOSSUtil {
     /**
      * 获取有过期时间的url
      */
-    public static String getPresignedUrl(OSSClient ossClient, String bucketName, String keyName, Date expirationDate) {
-        GeneratePresignedUrlRequest urlRequest = new GeneratePresignedUrlRequest(bucketName, keyName);
-        urlRequest.setExpiration(expirationDate);
-        final URL url = ossClient.generatePresignedUrl(urlRequest);
-        return url.toString();
+    public static String getPresignedUrl(ObsClient obsClient, String bucketName, String keyName, Date expirationDate) {
+
+        long durationSeconds = DateUtil.getDurationSeconds(new Date(), expirationDate);
+        TemporarySignatureRequest urlRequest = new TemporarySignatureRequest(HttpMethodEnum.GET, durationSeconds);
+        urlRequest.setBucketName(bucketName);
+        urlRequest.setObjectKey(keyName);
+        TemporarySignatureResponse temporarySignature = obsClient.createTemporarySignature(urlRequest);
+        return temporarySignature.getSignedUrl();
     }
 
     /**
@@ -240,8 +263,8 @@ public class AliOSSUtil {
     /**
      * 获取有过期时间的url
      */
-    public static String getPresignedUrl(OSSClient ossClient, String bucketName, String keyName, long millisSeconds) {
-        return getPresignedUrl(ossClient, bucketName, keyName, getExpirationTime(millisSeconds));
+    public static String getPresignedUrl(ObsClient obsClient, String bucketName, String keyName, long millisSeconds) {
+        return getPresignedUrl(obsClient, bucketName, keyName, getExpirationTime(millisSeconds));
     }
 
     /**
@@ -262,8 +285,8 @@ public class AliOSSUtil {
     /**
      * 从OSS删除文件
      */
-    public static void deleteObject(OSSClient ossClient, String bucketName, String keyName) {
-        ossClient.deleteObject(bucketName, keyName);
+    public static void deleteObject(ObsClient obsClient, String bucketName, String keyName) {
+        obsClient.deleteObject(bucketName, keyName);
     }
 
     /**
@@ -276,8 +299,8 @@ public class AliOSSUtil {
     /**
      * 判断资源是否存在
      */
-    public static boolean doesObjectExist(OSSClient ossClient, String bucketName, String keyName) {
-        return ossClient.doesObjectExist(bucketName, keyName);
+    public static boolean doesObjectExist(ObsClient obsClient, String bucketName, String keyName) {
+        return obsClient.doesObjectExist(bucketName, keyName);
     }
 
     /**

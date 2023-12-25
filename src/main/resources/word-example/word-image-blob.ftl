@@ -1,0 +1,1 @@
+<#--图片 base64 pkg 循环--><#macro render imagesIndex>    <#if imagesIndex?? >        <#list imagesIndex as item>            <pkg:part pkg:name="/word/media/img_${(item.name)?if_exists?xml}" pkg:contentType="${item.fileType}">                <pkg:binaryData>${item.base64}</pkg:binaryData>            </pkg:part>        </#list>    </#if></#macro>

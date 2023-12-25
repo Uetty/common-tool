@@ -60,7 +60,7 @@ public class CodeCounter {
     }
 
     public static void main(String[] args) {
-        final File file = new File("/Users/vince/IdeaProjects/e2e-backend2");
+        final File file = new File("/Users/xxx/code");
 
         Set<String> extNames = new HashSet<>();
         extNames.add("java");
